@@ -18,7 +18,6 @@ class StreamerActor extends Actor with ActorLogging {
   // we use the successful sending of a chunk as trigger for scheduling the next chunk
 
   def receive = {
-    log.debug("Starting streaming response ...")
     case StartStream(client) =>
       client ! ChunkedResponseStart(HttpResponse(entity = "")).withAck(Ok(5, client))
 

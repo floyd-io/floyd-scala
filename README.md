@@ -33,6 +33,6 @@ Follow these steps to get started:
 
         > re-stop
 
-8. Learn more at http://github.com/floyd-io/ and in http://www.spray.io/
+8. Learn more at http://github.com/floyd-io/ , in http://www.spray.io/ and in http://akka.io/
 
 9. Start hacking on src/main/scala/io/floyd/FloydServiceActor.scala

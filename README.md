@@ -1,7 +1,9 @@
 floyd-scala
 ===========
 
-Floyd Scala Server
+Floyd Scala Server.
+
+This server is intended as a boilerplate to show a stream of events using the chunked streams supported by HTTP 1.1
 
 Follow these steps to get started:
 

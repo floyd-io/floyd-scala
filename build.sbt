@@ -1,4 +1,4 @@
-organization  := "com.example"
+organization  := "io.floyd"
 
 version       := "0.1"
 

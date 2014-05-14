@@ -11,6 +11,10 @@ import scala.concurrent.duration._
 import scala.collection.mutable
 
 
+case class StartStream(client: ActorRef)
+
+// simple case class whose instances we use as send confirmation message for streaming chunks
+case class Ok(remaining: Int, client: ActorRef)
 
 class StreamerActor extends Actor with ActorLogging {
   import context.dispatcher // ExecutionContext for the futures and scheduler
@@ -40,8 +44,6 @@ class StreamerActor extends Actor with ActorLogging {
       }
   }
 
-  // simple case class whose instances we use as send confirmation message for streaming chunks
-  case class Ok(remaining: Int, client: ActorRef)
 }
 class FloydServiceActor extends Actor {
   
@@ -102,7 +104,4 @@ class FloydServiceActor extends Actor {
 
 }
 
-
-
-  case class StartStream(client: ActorRef)
 

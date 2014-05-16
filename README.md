@@ -33,6 +33,15 @@ Follow these steps to get started:
 
         > re-stop
 
-8. Learn more at http://github.com/floyd-io/ , in http://www.spray.io/ and in http://akka.io/
+8. Learn more at http://github.com/floyd-io/wiki , in http://www.spray.io/ and in http://akka.io/
 
 9. Start hacking on src/main/scala/io/floyd/FloydServiceActor.scala
+
+IDEA integration
+================
+
+To integrate with IntelliJ run the following command and import the project as an SBT project
+
+       $ sbt gen-idea
+
+

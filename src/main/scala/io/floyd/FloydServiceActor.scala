@@ -45,41 +45,37 @@ class StreamerActor extends Actor with ActorLogging {
   }
 
 }
-class FloydServiceActor extends Actor {
+class FloydServiceActor extends HttpServiceActor {
   
   import context.dispatcher // ExecutionContext for the futures and scheduler
 
-  // the HttpService trait defines only one abstract member, which
-  // connects the services environment to the enclosing actor or test
-  def actorRefFactory = context
-
   val streamActor = context.actorOf(Props[StreamerActor], name="streamer-full")
 
-  def receive = {
-    // when a new  connection comes in we register ourselves as the connection handler
-    case _: Http.Connected => sender ! Http.Register(self)
-
-    case HttpRequest(GET, Uri.Path("/"), _, _, _) =>
-      println(Thread.currentThread)
-      sender ! index
-
-    case HttpRequest(GET, Uri.Path("/stream"), _, _, _) =>
-      streamActor ! StartStream(sender)
-
-    case HttpRequest(GET, Uri.Path("/ping"), _, _, _) =>
-      println(Thread.currentThread)
-      sender ! HttpResponse(entity = "PONG!")
-
-    case HttpRequest(GET, Uri.Path("/stop"), _, _, _) =>
-      sender ! HttpResponse(entity = "Shutting down in 1 second ...")
-      sender ! Http.Close
-      context.system.scheduler.scheduleOnce(1.second) { context.system.shutdown() }
-
-    case HttpRequest(GET, Uri.Path("/crash"), _, _, _) =>
-      println(Thread.currentThread)
-      sender ! HttpResponse(entity = "About to throw an exception in the request handling actor, " +
-        "which triggers an actor restart")
-      sys.error("BOOM!")
+  def receive = runRoute {
+    path("ping") {
+      complete {
+        "PONG"
+      }
+    } ~
+    path("stream") { ctx =>
+      streamActor ! StartStream(ctx.responder)
+    } ~
+    path("stop") {
+      complete {
+        in(1.second) { context.system.shutdown() }
+        "Shutting down in 1 second..."
+      }
+    } ~
+    path("crash") {
+      complete {
+        sys.error("BOOM!")
+      }
+    } ~
+    path("") {
+      complete {
+        index
+      }
+    }
   }
 
   lazy val index = HttpResponse(
@@ -99,8 +95,8 @@ class FloydServiceActor extends Actor {
     )
   )
 
-  
-
+  def in[U](duration: FiniteDuration)(body: => U): Unit =
+    context.system.scheduler.scheduleOnce(duration)(body)
 
 }
 

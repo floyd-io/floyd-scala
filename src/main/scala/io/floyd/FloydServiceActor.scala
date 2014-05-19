@@ -35,11 +35,7 @@ class StreamerActor extends Actor with ActorLogging {
       log.info(this.toString())
       log.info(self.toString())
       context.system.scheduler.scheduleOnce(1000 millis span) {
-        val json = s"""{
-            date:"${DateTime.now.toIsoDateTimeString.toString()}",
-            count:"$remaining"
-          }
-          """
+        val json = s"""{date: "${DateTime.now.toIsoDateTimeString.toString()}", count:"$remaining" }\n"""
         client ! MessageChunk(json).withAck(Ok(remaining - 1, client))
       }
   }
@@ -70,6 +66,9 @@ class FloydServiceActor extends HttpServiceActor {
       complete {
         sys.error("BOOM!")
       }
+    } ~
+    path("part2.html") { ctx =>
+      streamActor ! StartStream(ctx.responder)
     } ~
     path("") {
       complete {

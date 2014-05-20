@@ -22,7 +22,7 @@ object StreamerActor {
 class StreamerActor(client: ActorRef) extends Actor with ActorLogging {
   def receive = {
     case StartStream() =>
-      client ! ChunkedResponseStart(HttpResponse(entity = ""))
+      client ! ChunkedResponseStart(HttpResponse(entity = s"""{data:"start"}\n"""))
 
     case Http.PeerClosed =>
       log.info("killing " + self.toString() )

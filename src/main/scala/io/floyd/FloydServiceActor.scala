@@ -11,7 +11,7 @@ import scala.concurrent.duration._
 import akka.actor.SupervisorStrategy.Restart
 
 class FloydServiceActor extends HttpServiceActor with ActorLogging {
-  
+
   import context.dispatcher // ExecutionContext for the futures and scheduler
 
   def receive = runRoute {

@@ -1,8 +1,9 @@
 package io.floyd
 
 import akka.actor._
-import spray.http.{ChunkedResponseStart, HttpResponse, MessageChunk}
+import spray.http.{HttpEntity, ChunkedResponseStart, HttpResponse, MessageChunk}
 import spray.can.Http
+import spray.http.ContentTypes.`application/json`
 
 case class StartStream()
 
@@ -19,7 +20,9 @@ class StreamerActor(client: ActorRef) extends Actor with ActorLogging {
 
   def receive = {
     case StartStream() =>
-      client ! ChunkedResponseStart(HttpResponse(entity = s"""{data:"start"}\n"""))
+       client ! ChunkedResponseStart(
+         HttpResponse(entity = HttpEntity(`application/json`, s"""{data:"start"}\n""") )
+       )
 
     case x: Http.ConnectionClosed =>
       log.info("killing " + self.toString() )

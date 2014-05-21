@@ -4,7 +4,6 @@ import akka.actor._
 import spray.http.{ChunkedResponseStart, HttpResponse, MessageChunk,
   ChunkedMessageEnd, DateTime}
 import spray.can.Http
-import spray.can.Http.ConnectionClosed
 import spray.http.HttpResponse
 import spray.http.ChunkedResponseStart
 
@@ -24,7 +23,7 @@ class StreamerActor(client: ActorRef) extends Actor with ActorLogging {
     case StartStream() =>
       client ! ChunkedResponseStart(HttpResponse(entity = s"""{data:"start"}\n"""))
 
-    case Http.PeerClosed =>
+    case x: Http.ConnectionClosed =>
       log.info("killing " + self.toString() )
       self ! PoisonPill
 

@@ -1,18 +1,30 @@
 package io.floyd
 
-import akka.actor.{OneForOneStrategy, Identify, ActorLogging, Props}
+import akka.actor._
 import spray.routing._
 import spray.http._
 import MediaTypes._
-import spray.can.Http
-import HttpMethods._
-import MediaTypes._
 import scala.concurrent.duration._
-import akka.actor.SupervisorStrategy.Restart
+import spray.http.HttpResponse
 
 class FloydServiceActor extends HttpServiceActor with ActorLogging {
 
   import context.dispatcher // ExecutionContext for the futures and scheduler
+
+  var nextStreamNumber: Integer = 0
+
+  def createStreamer(client:ActorRef) = {
+    log.info("about to create the actor for the stream")
+    val newActor = context.actorOf(StreamerActor.props(client), createNameOfStreamer())
+    log.info("new actor " + newActor.toString())
+    newActor ! StartStream()
+  }
+
+  def createNameOfStreamer() = {
+    val streamName = "stream" + nextStreamNumber
+    nextStreamNumber = nextStreamNumber + 1
+    streamName
+  }
 
   def receive = runRoute {
     path("ping") {
@@ -21,19 +33,19 @@ class FloydServiceActor extends HttpServiceActor with ActorLogging {
       }
     } ~
     path("stream") { ctx =>
-      context.actorOf(StreamerActor.props(ctx.responder)) ! StartStream()
+      createStreamer(ctx.responder)
     } ~
     (path("update") & post){
       entity(as[String]) { data =>
         complete {
           log.info("children list " + context.children.toString())
-          context.actorSelection("*") ! Update(data)
+          context.actorSelection("stream*") ! Update(data)
           "sent update to all streams"
         }
       }
     } ~
     path("part2.html") { ctx =>
-      context.actorOf(StreamerActor.props(ctx.responder)) ! StartStream()
+      createStreamer(ctx.responder)
     } ~
     path("stop") {
       complete {

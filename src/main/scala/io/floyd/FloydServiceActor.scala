@@ -47,6 +47,9 @@ class FloydServiceActor extends HttpServiceActor with ActorLogging {
     path("part2.html") { ctx =>
       createStreamer(ctx.responder)
     } ~
+    path("jsclient.html") {
+        getFromResource("jsClient.html")
+    } ~
     path("stop") {
       complete {
         in(1.second) { context.system.shutdown() }
@@ -82,6 +85,7 @@ class FloydServiceActor extends HttpServiceActor with ActorLogging {
       </html>.toString()
     )
   )
+
 
   def in[U](duration: FiniteDuration)(body: => U): Unit =
     context.system.scheduler.scheduleOnce(duration)(body)

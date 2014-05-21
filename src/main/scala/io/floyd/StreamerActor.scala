@@ -1,11 +1,8 @@
 package io.floyd
 
 import akka.actor._
-import spray.http.{ChunkedResponseStart, HttpResponse, MessageChunk,
-  ChunkedMessageEnd, DateTime}
+import spray.http.{ChunkedResponseStart, HttpResponse, MessageChunk}
 import spray.can.Http
-import spray.http.HttpResponse
-import spray.http.ChunkedResponseStart
 
 case class StartStream()
 
@@ -19,6 +16,7 @@ object StreamerActor {
 }
 
 class StreamerActor(client: ActorRef) extends Actor with ActorLogging {
+
   def receive = {
     case StartStream() =>
       client ! ChunkedResponseStart(HttpResponse(entity = s"""{data:"start"}\n"""))
@@ -28,8 +26,6 @@ class StreamerActor(client: ActorRef) extends Actor with ActorLogging {
       self ! PoisonPill
 
     case Update(data) =>
-      log.info("parent " + context.parent.toString())
-      log.info("children list " + context.children.toString())
       val json = s"""{ data:"${data}" }\n"""
       client ! MessageChunk(json)
   }

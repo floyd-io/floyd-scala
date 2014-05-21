@@ -10,21 +10,7 @@ import spray.http.HttpResponse
 class FloydServiceActor extends HttpServiceActor with ActorLogging {
 
   import context.dispatcher // ExecutionContext for the futures and scheduler
-
-  var nextStreamNumber: Integer = 0
-
-  def createStreamer(client:ActorRef) = {
-    log.info("about to create the actor for the stream")
-    val newActor = context.actorOf(StreamerActor.props(client), createNameOfStreamer())
-    log.info("new actor " + newActor.toString())
-    newActor ! StartStream()
-  }
-
-  def createNameOfStreamer() = {
-    val streamName = "stream" + nextStreamNumber
-    nextStreamNumber = nextStreamNumber + 1
-    streamName
-  }
+  val allEventsActor = context.actorOf(Props[AllEventsActor], "all-events-actor")
 
   def receive = runRoute {
     path("ping") {
@@ -33,19 +19,18 @@ class FloydServiceActor extends HttpServiceActor with ActorLogging {
       }
     } ~
     path("stream") { ctx =>
-      createStreamer(ctx.responder)
+      allEventsActor ! ctx.responder
     } ~
     (path("update") & post){
       entity(as[String]) { data =>
         complete {
-          log.info("children list " + context.children.toString())
-          context.actorSelection("stream*") ! Update(data)
-          "sent update to all streams"
+          allEventsActor ! Update(data)
+          "sent update to all-events-actor\n"
         }
       }
     } ~
     path("part2.html") { ctx =>
-      createStreamer(ctx.responder)
+      allEventsActor ! ctx.responder
     } ~
     path("stop") {
       complete {

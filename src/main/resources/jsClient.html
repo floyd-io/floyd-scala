@@ -1,0 +1,96 @@
+<html>
+	<input id = "btnConnect" type="submit" value="Connect!"/>
+	<div name="status", id="status">Disconnected</div>
+	<br>
+	<br>
+	<br>
+	<div>Received Pushes</div>
+	<div name="data", id="data" />
+
+	<script src="//code.jquery.com/jquery-1.11.0.min.js"></script>
+	<script>
+		var connected = false;
+		var xhr;
+
+		$("#btnConnect").click(function(){
+		  
+			if (connected){
+				connected = false;
+				$("#btnConnect").prop('value', 'Connect');
+				xhr.abort();
+				console.log("Client Disconnected");
+			} 
+			else {		 
+				connected = true;
+				$("#btnConnect").prop('value', 'Disconnect');			
+				reconnect();
+			}
+		 }); 
+				
+		function reconnect() {		  
+			console.log("Connecting to Server...");
+			$('#status').text("Connecting to Server...");
+		  
+			xhr = new XMLHttpRequest();
+			xhr.open('GET', 'part2.html', true);
+
+			var nextLine = 0;
+			console.log("opened");
+
+			xhr.onreadystatechange = function () {
+			    console.log("onreadystatechange");
+				
+				//readyState: headers received 2, body received 3, done 4
+				if (xhr.readyState != 2 && xhr.readyState != 3 && xhr.readyState != 4)
+					return;
+				if (xhr.readyState == 3 && xhr.status != 200)
+					return;
+				if (xhr.readyState == 2 && xhr.status == 200)
+				{
+					console.log("Connected...");
+					$('#status').text("Connected. Listening...");
+				}
+				
+				$("#data").append("<div>"+xhr.response.slice(nextLine) +"</div>");  
+				
+				nextLine = xhr.response.length;
+			}
+
+			xhr.onload = function () {
+				//server completed the request.
+				
+				console.log("onload");
+				//reconnect();
+				
+				connected = false;
+				$("#btnConnect").prop('value', 'Connect');
+				console.log("Server disconnected");
+				$('#status').text("Disconnected");
+			}
+			
+			xhr.onerror = function () {
+				//console.log("reconnecting after error...");
+				//reconnect();
+				
+				//server closed. Handle reconnects...
+				console.log("Server disconnected in a graceless manner");
+				$('#status').text("Disconnected");				
+				connected = false;
+				$("#btnConnect").prop('value', 'Connect');				
+			}
+		  
+			xhr.onabort = function () {
+				//console.log("reconnecting after abort...");
+				//reconnect();
+				
+				//client aborted the operation.
+				console.log("aborted");
+				$('#status').text("Disconnected");
+			}
+
+            console.log("sending");
+			xhr.send();
+			console.log("sent");
+		};
+	</script>
+</html>

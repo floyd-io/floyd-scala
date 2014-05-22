@@ -1,16 +1,30 @@
 <html>
+    <input id="textToPost" type="text">
+    <input id="btnPost" type="submit" value="Post Message">
+    <div name="postStatus" id="postStatus"></div>
+    <br>
+    <br>
 	<input id = "btnConnect" type="submit" value="Connect!"/>
-	<div name="status", id="status">Disconnected</div>
+	<div name="status" id="status">Disconnected</div>
 	<br>
 	<br>
 	<br>
 	<div>Received Pushes</div>
-	<div name="data", id="data" />
+	<div name="data" id="data" />
 
 	<script src="//code.jquery.com/jquery-1.11.0.min.js"></script>
 	<script>
 		var connected = false;
 		var xhr;
+
+		$("#btnPost").click(function() {
+
+            $.post( "update", $("#textToPost").val(), function(data) {
+                console.log("post sent");
+                $("#postStatus").text('posted: ' + $("#textToPost").val() + "  |  server says: " + data);
+                $("#textToPost").val("");
+            });
+		});
 
 		$("#btnConnect").click(function(){
 		  
@@ -25,7 +39,7 @@
 				$("#btnConnect").prop('value', 'Disconnect');			
 				reconnect();
 			}
-		 }); 
+		});
 				
 		function reconnect() {		  
 			console.log("Connecting to Server...");

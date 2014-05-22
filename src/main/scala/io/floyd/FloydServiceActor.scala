@@ -30,6 +30,7 @@ class FloydServiceActor extends HttpServiceActor with ActorLogging {
       }
     } ~
     path("part2.html") { ctx =>
+      sender ! SetRequestTimeout(10.minutes)
       allEventsActor ! ctx.responder
     } ~
     path("jsclient.html") {

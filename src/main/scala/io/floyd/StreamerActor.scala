@@ -1,7 +1,8 @@
 package io.floyd
 
 import akka.actor._
-import spray.http.{HttpEntity, ChunkedResponseStart, HttpResponse, MessageChunk}
+import spray.http.{HttpEntity, ChunkedResponseStart, HttpResponse, MessageChunk, SetRequestTimeout}
+import scala.concurrent.duration._
 import spray.can.Http
 import spray.http.ContentTypes.`application/json`
 
@@ -20,9 +21,10 @@ class StreamerActor(client: ActorRef) extends Actor with ActorLogging {
 
   def receive = {
     case StartStream() =>
-       client ! ChunkedResponseStart(
-         HttpResponse(entity = HttpEntity(`application/json`, s"""{data:"start"}\n""") )
-       )
+      client ! SetRequestTimeout(10 minutes)
+      client ! ChunkedResponseStart(
+        HttpResponse(entity = HttpEntity(`application/json`, s"""{data:"start"}\n""") )
+      )
 
     case x: Http.ConnectionClosed =>
       log.info("killing " + self.toString() )

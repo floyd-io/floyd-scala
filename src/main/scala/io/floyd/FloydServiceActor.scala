@@ -64,6 +64,7 @@ class FloydServiceActor extends HttpServiceActor with ActorLogging {
             <li><a href="/stream">/stream</a></li>
             <li><a href="/crash">/crash</a></li>
             <li><a href="/stop">/stop</a></li>
+            <li><a href="/jsclient.html">/jsclient.html</a></li>
             <li><a href="/update">post here /update</a></li>
           </ul>
         </body>

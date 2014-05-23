@@ -8,9 +8,6 @@ import spray.http.ContentTypes.`application/json`
 
 case class StartStream()
 
-// simple case class whose instances we use as send confirmation message for streaming chunks
-case class Ok(remaining: Int, client: ActorRef)
-
 case class Update(data: String)
 
 object StreamerActor {
@@ -23,7 +20,7 @@ class StreamerActor(client: ActorRef) extends Actor with ActorLogging {
     case StartStream() =>
       client ! SetRequestTimeout(10 minutes)
       client ! ChunkedResponseStart(
-        HttpResponse(entity = HttpEntity(`application/json`, s"""{data:"start"}\n""") )
+        HttpResponse(entity = HttpEntity(`application/json`, updateData("start")))
       )
 
     case x: Http.ConnectionClosed =>
@@ -31,8 +28,11 @@ class StreamerActor(client: ActorRef) extends Actor with ActorLogging {
       self ! PoisonPill
 
     case Update(data) =>
-      val json = s"""{ data:"${data}" }\n"""
-      client ! MessageChunk(json)
+      client ! MessageChunk(updateData(data))
+  }
+
+  def updateData(data:String) = {
+    s"""{ data:"${data}" }\n"""
   }
 
 }

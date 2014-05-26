@@ -8,7 +8,7 @@ class AllEventsActor extends Actor with ActorLogging {
 
   def createStreamer(client:ActorRef) = {
     val newActor = context.actorOf(StreamerActor.props(client), createNameOfStreamer())
-    log.info("new actor " + newActor.toString())
+    log.debug("new actor " + newActor.toString())
     newActor ! StartStream()
   }
 

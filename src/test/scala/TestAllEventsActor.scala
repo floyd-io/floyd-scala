@@ -15,4 +15,11 @@ class AllEventsActorSpec extends TestKit(ActorSystem()) with ImplicitSender with
     actor.nextValue.next() should be (2)
   }
 
+  "AllEventsActor.createNameOfStreamer" should "give several stream consecutive names" in {
+    val actorRef = TestActorRef[AllEventsActor]
+    val actor = actorRef.underlyingActor
+    actor.createNameOfStreamer should be ("stream1")
+    actor.createNameOfStreamer should be ("stream2")
+  }
+
 }

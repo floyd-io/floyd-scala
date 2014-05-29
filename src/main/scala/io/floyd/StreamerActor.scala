@@ -32,7 +32,7 @@ class StreamerActor(client: ActorRef) extends Actor with ActorLogging {
   }
 
   def updateData(data:String) = {
-    s"""{ data:"${data}" }\n"""
+    s"""{ "data":"${data}" }\n"""
   }
 
 }

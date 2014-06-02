@@ -1,6 +1,5 @@
 import akka.actor.Props
 import akka.testkit.TestProbe
-import scala.concurrent.duration._
 
 import io.floyd.AllEventsActor
 import io.floyd.Update
@@ -25,3 +24,5 @@ class TestUpdatesIntegration extends BaseUnitTestActor with UpdateHttpDataMatche
     }
   }
 }
+
+

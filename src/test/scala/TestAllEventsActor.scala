@@ -9,6 +9,7 @@ class TestAllEventsActor extends BaseUnitTestActor {
     val actor = actorRef.underlyingActor
     actorRef ! self
     actor.nextValue.next() should be (2)
+    receiveN(2)
   }
 
   "AllEventsActor.createNameOfStreamer" should "give several stream consecutive names" in {

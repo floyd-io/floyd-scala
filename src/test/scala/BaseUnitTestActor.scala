@@ -11,7 +11,7 @@ abstract class BaseUnitTestActor extends TestKit(ActorSystem()) with ImplicitSen
   with FlatSpecLike with Matchers with BeforeAndAfterAll {
 
   override def afterAll {
-    TestKit.shutdownActorSystem(system)
+    shutdown(verifySystemShutdown = true)
   }
 }
 

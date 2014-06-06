@@ -17,7 +17,6 @@ class TestStreamerActor extends BaseUnitTestActor with UpdateHttpDataMatcher {
       case ChunkedResponseStart(HttpResponse(_, httpEntity, _, _)) =>
         jsonShouldBe(httpEntity.data, "start")
     }
-    expectNoMsg()
   }
 
   "StreamerActor" should "send JSON updates to its client" in {
@@ -27,6 +26,5 @@ class TestStreamerActor extends BaseUnitTestActor with UpdateHttpDataMatcher {
       case MessageChunk(data, extension) => 
         jsonShouldBe(data, "test")
     }
-    expectNoMsg()
   }
 }

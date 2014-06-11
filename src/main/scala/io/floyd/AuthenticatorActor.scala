@@ -32,21 +32,14 @@ class AuthenticatorActor extends Actor with ActorLogging {
         "password" -> user.password
       )
       val futureList: Future[List[BSONDocument]] = collection.find(query).cursor[BSONDocument].collect[List]()
-      val promise:Promise[Any] = Promise()
 
-      futureList onComplete {
-        case Success(validUsers) =>
-          if (validUsers.isEmpty){
-            promise success InvalidUser
-          }
-          else{
-            promise success ValidUser
-          }
-        case Failure(t) =>
-          promise failure new Exception("failed on retrieve from DB", t)
+      val futureResult: Future[Any] = futureList map { validUsers =>
+        if (validUsers.isEmpty)
+          InvalidUser
+        else
+          ValidUser
       }
-      promise.future pipeTo sender
-
+      futureResult pipeTo sender
   }
 
 }

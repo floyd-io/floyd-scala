@@ -7,9 +7,8 @@ import reactivemongo.api._
 import reactivemongo.bson._
 
 import scala.concurrent._
-import scala.util.{Success, Failure}
 
-case class User(userName: String, password: String)
+case class User(username: String, password: String)
 case class ValidUser()
 case class InvalidUser()
 
@@ -28,7 +27,7 @@ class AuthenticatorActor extends Actor with ActorLogging {
   def receive = {
     case user: User =>
       val query = BSONDocument(
-        "userName" -> user.userName,
+        "username" -> user.username,
         "password" -> user.password
       )
       val futureList: Future[List[BSONDocument]] = collection.find(query).cursor[BSONDocument].collect[List]()
@@ -39,6 +38,7 @@ class AuthenticatorActor extends Actor with ActorLogging {
         else
           ValidUser
       }
+
       futureResult pipeTo sender
   }
 

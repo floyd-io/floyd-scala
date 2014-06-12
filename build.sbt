@@ -8,7 +8,7 @@ scalacOptions := Seq("-unchecked", "-deprecation", "-encoding", "utf8")
 
 resolvers += "Typesafe releases repository" at "http://repo.typesafe.com/typesafe/releases/"
 
-resolvers += "OSS Typesafe snapshots repository" at "http://oss.sonatype.org/content/repositories/snapshots/"
+resolvers += "OSS Typesafe snapshots repository" at "https://oss.sonatype.org/content/repositories/snapshots/"
 
 libraryDependencies ++= {
   val akkaV = "2.3.3"

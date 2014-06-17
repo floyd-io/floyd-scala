@@ -1,16 +1,28 @@
 package io.floyd
 
 import akka.actor._
+import akka.pattern.ask
+import akka.util.Timeout
+
 import spray.routing._
 import spray.http._
 import MediaTypes._
-import scala.concurrent.duration._
 import spray.http.HttpResponse
+import spray.routing.authentication.{UserPass, BasicAuth}
+
+import scala.concurrent.duration._
+import scala.concurrent.Future
 
 class FloydServiceActor extends HttpServiceActor with ActorLogging {
 
   import context.dispatcher // ExecutionContext for the futures and scheduler
   val allEventsActor = context.actorOf(Props[AllEventsActor], "all-events-actor")
+  val authenticatorActor = context.actorOf(Props[AuthenticatorActor], "authenticator-actor")
+
+  def userPassAuthenticator(userPass: Option[UserPass]): Future[Option[String]] = {
+    implicit val timeout = Timeout(5 seconds)
+    authenticatorActor ? userPass map { _.asInstanceOf[Option[String]] }
+  }
 
   def receive = runRoute {
     path("ping") {
@@ -33,7 +45,14 @@ class FloydServiceActor extends HttpServiceActor with ActorLogging {
       allEventsActor ! ctx.responder
     } ~
     path("jsclient.html") {
-        getFromResource("jsClient.html")
+      getFromResource("jsClient.html")
+    } ~
+    path("validateUser") {
+      authenticate(BasicAuth(userPassAuthenticator _, "admin area")) { user =>
+        complete {
+          "validated user"
+        }
+      }
     } ~
     path("stop") {
       complete {

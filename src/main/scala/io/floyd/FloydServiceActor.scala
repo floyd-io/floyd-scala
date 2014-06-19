@@ -16,8 +16,9 @@ import scala.concurrent.Future
 class FloydServiceActor extends HttpServiceActor with ActorLogging {
 
   import context.dispatcher // ExecutionContext for the futures and scheduler
-  val allEventsActor = context.actorOf(Props[AllEventsActor], "all-events-actor")
+  val allEventsActor = context.actorOf(Props[EventsActor], "all-events-actor")
   val authenticatorActor = context.actorOf(Props[AuthenticatorActor], "authenticator-actor")
+  val userEventsActor = context.actorOf(Props[UserEventsActor], "user-events-actor")
 
   def userPassAuthenticator(userPass: Option[UserPass]): Future[Option[String]] = {
     implicit val timeout = Timeout(5 seconds)
@@ -44,11 +45,28 @@ class FloydServiceActor extends HttpServiceActor with ActorLogging {
     path("part2.html") { ctx =>
       allEventsActor ! ctx.responder
     } ~
+    path("streamUser") {
+      authenticate(BasicAuth(userPassAuthenticator _, "user area")) { (user) =>
+        { ctx =>
+          userEventsActor ! StartStreamForUser(user, ctx.responder)
+        }
+      }
+    } ~
+    (path("updateUser") & post) {
+      authenticate(BasicAuth(userPassAuthenticator _, "user area")) { user =>
+        entity(as[String]) { data =>
+          complete {
+            userEventsActor ! UpdateForUser(user, data)
+            "sent update to user-events-actor\n"
+          }
+        }
+      }
+    } ~
     path("jsclient.html") {
       getFromResource("jsClient.html")
     } ~
     path("validateUser") {
-      authenticate(BasicAuth(userPassAuthenticator _, "admin area")) { user =>
+      authenticate(BasicAuth(userPassAuthenticator _, "user area")) { user =>
         complete {
           "validated user"
         }

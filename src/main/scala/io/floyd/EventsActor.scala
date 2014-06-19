@@ -2,7 +2,7 @@ package io.floyd
 
 import akka.actor.{ActorRef, ActorLogging, Actor}
 
-class AllEventsActor extends Actor with ActorLogging {
+class EventsActor extends Actor with ActorLogging {
 
   val nextValue = Iterator.from(1)
 

@@ -3,33 +3,15 @@ import akka.testkit.TestActorRef
 import io.floyd.db.ReactiveConnection
 import io.floyd.AuthenticatorActor
 
+import org.scalatest.BeforeAndAfterAll
 import reactivemongo.bson.BSONDocument
 import spray.routing.authentication.UserPass
 
 import scala.concurrent.Await
 import scala.concurrent.duration._
 
-class TestAuthenticatorActor extends BaseUnitTestActor {
+class TestAuthenticatorActor extends InsertOnStartupEmail {
   val authenticator = TestActorRef[AuthenticatorActor]
-
-  import concurrent.ExecutionContext.Implicits.global
-  val document = BSONDocument(
-    "username" -> "testEmail@yahoo.com",
-    "password" -> "password")
-
-  override def beforeAll() = {
-    super.beforeAll()
-
-    val future = ReactiveConnection.db("users").insert(document)
-    Await.result(future, 5 seconds)
-  }
-
-  override def afterAll() {
-    super.afterAll()
-
-    val future = ReactiveConnection.db("users").remove(document)
-    Await.result(future, 5 seconds)
-  }
 
   "AuthenticatorActor" should "validate correct user in DB with Some(username)" in {
     authenticator ! Some(UserPass("testEmail@yahoo.com", "password"))

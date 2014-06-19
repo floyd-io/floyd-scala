@@ -14,14 +14,3 @@ abstract class BaseUnitTestActor extends TestKit(ActorSystem()) with ImplicitSen
     shutdown(verifySystemShutdown = true)
   }
 }
-
-trait UpdateHttpDataMatcher extends Matchers {
-  def jsonShouldBe(httpData: HttpData, expected:String) = {
-    val jsonString = httpData.asString(HttpCharsets.`UTF-8`)
-    val result = JSON.parseFull(jsonString)
-    result match {
-      case Some(e) => e.asInstanceOf[Map[String,Any]].get("data") should be (Some(expected))
-      case x => throw new Exception("failed parsing of JSON")
-    }
-  }
-}

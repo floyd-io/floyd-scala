@@ -8,22 +8,26 @@ import spray.routing._
 import spray.http._
 import MediaTypes._
 import spray.http.HttpResponse
-import spray.routing.authentication.{UserPass, BasicAuth}
 
 import scala.concurrent.duration._
-import scala.concurrent.Future
 
 class FloydServiceActor extends HttpServiceActor with ActorLogging {
 
   import context.dispatcher // ExecutionContext for the futures and scheduler
   val allEventsActor = context.actorOf(Props[EventsActor], "all-events-actor")
-  val authenticatorActor = context.actorOf(Props[AuthenticatorActor], "authenticator-actor")
   val userEventsActor = context.actorOf(Props[UserEventsActor], "user-events-actor")
+  val tokenAuthActor = context.actorOf(Props[TokenAuthActor], "token-auth-actor")
 
-  def userPassAuthenticator(userPass: Option[UserPass]): Future[Option[String]] = {
+  val authenticator = TokenAuthenticator[String](
+    headerName = "X-Authorization",
+    queryStringParameterName = "x_authorization"
+  ) { key =>
     implicit val timeout = Timeout(5 seconds)
-    authenticatorActor ? userPass map { _.asInstanceOf[Option[String]] }
+    val response = tokenAuthActor ? Token(key)
+    response map { _.asInstanceOf[Option[String]] }
   }
+
+  def auth: Directive1[String] = authenticate(authenticator)
 
   def receive = runRoute {
     path("ping") {
@@ -46,14 +50,14 @@ class FloydServiceActor extends HttpServiceActor with ActorLogging {
       allEventsActor ! ctx.responder
     } ~
     path("streamUser") {
-      authenticate(BasicAuth(userPassAuthenticator _, "user area")) { (user) =>
+      auth { user =>
         { ctx =>
           userEventsActor ! StartStreamForUser(user, ctx.responder)
         }
       }
     } ~
     (path("updateUser") & post) {
-      authenticate(BasicAuth(userPassAuthenticator _, "user area")) { user =>
+      auth { user =>
         entity(as[String]) { data =>
           complete {
             userEventsActor ! UpdateForUser(user, data)
@@ -65,11 +69,11 @@ class FloydServiceActor extends HttpServiceActor with ActorLogging {
     path("jsclient.html") {
       getFromResource("jsClient.html")
     } ~
-    path("validateUser") {
-      authenticate(BasicAuth(userPassAuthenticator _, "user area")) { user =>
-        complete {
-          "validated user"
-        }
+    path("login") {
+      formFields('user, 'pass) { (user, pass) =>
+        implicit val timeout = Timeout(5 seconds)
+        val futureResult = tokenAuthActor ? LoginUser(user,pass) map { _.asInstanceOf[String] }
+        complete(futureResult)
       }
     } ~
     path("stop") {

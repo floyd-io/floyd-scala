@@ -25,14 +25,15 @@ class TokenAuthActor extends Actor {
       val futureResult = authenticatorActor ? Some(UserPass(user,pass))
       futureResult map {
         case Some(userFound) =>
-          val tokensFound = tokensUsers.filter(_._2 == userFound).keys.toList
+          val tokensFound = (tokensUsers filter {case (_, user) => user == userFound}).
+            keys.toList
           tokensFound match {
             case token :: tail =>
               token
             case Nil =>
-              val uuid = java.util.UUID.randomUUID.toString()
-              tokensUsers += (uuid -> user)
-              uuid
+              val newToken = java.util.UUID.randomUUID.toString()
+              tokensUsers += (newToken -> user)
+              newToken
           }
         case None =>
           "invalid user"

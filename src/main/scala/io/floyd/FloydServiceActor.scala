@@ -76,9 +76,7 @@ class FloydServiceActor extends HttpServiceActor with ActorLogging {
         val futureResult = (tokenAuthActor ? LoginUser(user,pass)).mapTo[String]
         onComplete(futureResult) {
           case Success(authToken) => complete(authToken)
-          case Failure(ex) =>
-            println("exception detected ON floydserviceactor" + ex)
-            complete(spray.http.StatusCodes.Forbidden, s"Invalid User")
+          case Failure(ex) => complete(spray.http.StatusCodes.Forbidden, s"Invalid User")
         }
       }
     } ~

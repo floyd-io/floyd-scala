@@ -67,9 +67,9 @@ class FloydServiceActor extends HttpServiceActor with ActorLogging {
       getFromResource("jsClient.html")
     } ~
     path("user" / "login") {
-      formFields('user, 'pass) { (user, pass) =>
+      formFields('user, 'pass).as(LoginUser) { user =>
         implicit val timeout = Timeout(5 seconds)
-        val futureResult = (tokenAuthActor ? LoginUser(user,pass)).mapTo[String]
+        val futureResult = (tokenAuthActor ? user).mapTo[String]
         onComplete(futureResult) {
           case Success(authToken) => complete(authToken)
           case Failure(ex) => complete(Forbidden, s"Invalid User")

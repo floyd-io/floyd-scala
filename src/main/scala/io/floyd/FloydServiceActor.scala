@@ -8,6 +8,7 @@ import spray.routing._
 import spray.http._
 import MediaTypes._
 import spray.http.HttpResponse
+import spray.http.StatusCodes.Forbidden
 
 import scala.concurrent.duration._
 import scala.util.{Success, Failure}
@@ -36,9 +37,6 @@ class FloydServiceActor extends HttpServiceActor with ActorLogging {
         "PONG"
       }
     } ~
-    path("stream") { ctx =>
-      allEventsActor ! ctx.responder
-    } ~
     (path("update") & post){
       entity(as[String]) { data =>
         complete {
@@ -50,11 +48,9 @@ class FloydServiceActor extends HttpServiceActor with ActorLogging {
     path("part2.html") { ctx =>
       allEventsActor ! ctx.responder
     } ~
-    path("streamUser") {
-      auth { user =>
-        { ctx =>
-          userEventsActor ! StartStreamForUser(user, ctx.responder)
-        }
+    path("stream") {
+      auth { user => ctx =>
+        userEventsActor ! StartStreamForUser(user, ctx.responder)
       }
     } ~
     (path("updateUser") & post) {
@@ -70,13 +66,13 @@ class FloydServiceActor extends HttpServiceActor with ActorLogging {
     path("jsclient.html") {
       getFromResource("jsClient.html")
     } ~
-    path("login") {
+    path("user" / "login") {
       formFields('user, 'pass) { (user, pass) =>
         implicit val timeout = Timeout(5 seconds)
         val futureResult = (tokenAuthActor ? LoginUser(user,pass)).mapTo[String]
         onComplete(futureResult) {
           case Success(authToken) => complete(authToken)
-          case Failure(ex) => complete(spray.http.StatusCodes.Forbidden, s"Invalid User")
+          case Failure(ex) => complete(Forbidden, s"Invalid User")
         }
       }
     } ~

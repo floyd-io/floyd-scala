@@ -18,10 +18,10 @@ class TestTokenAuthActor extends InsertOnStartupEmail {
     expectMsg(authToken)
   }
 
-  "TokenAuthActor" should "give invalid user for invalid user" in {
+  "TokenAuthActor" should "give Exception for invalid user" in {
     val tokenAuthActor = TestActorRef[TokenAuthActor]
     tokenAuthActor ! LoginUser("invalidEmail@yahoo.com", "password")
-    val authToken = expectMsgClass(classOf[String])
-    authToken should be ("invalid user")
+    val authToken = expectMsgClass(classOf[akka.actor.Status.Failure])
+    authToken.cause.getMessage() should be ("invalid user")
   }
 }

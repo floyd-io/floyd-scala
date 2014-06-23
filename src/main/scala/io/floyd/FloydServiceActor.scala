@@ -10,6 +10,7 @@ import MediaTypes._
 import spray.http.HttpResponse
 
 import scala.concurrent.duration._
+import scala.util.{Success, Failure}
 
 class FloydServiceActor extends HttpServiceActor with ActorLogging {
 
@@ -72,8 +73,13 @@ class FloydServiceActor extends HttpServiceActor with ActorLogging {
     path("login") {
       formFields('user, 'pass) { (user, pass) =>
         implicit val timeout = Timeout(5 seconds)
-        val futureResult = tokenAuthActor ? LoginUser(user,pass) map { _.asInstanceOf[String] }
-        complete(futureResult)
+        val futureResult = (tokenAuthActor ? LoginUser(user,pass)).mapTo[String]
+        onComplete(futureResult) {
+          case Success(authToken) => complete(authToken)
+          case Failure(ex) =>
+            println("exception detected ON floydserviceactor" + ex)
+            complete(spray.http.StatusCodes.Forbidden, s"Invalid User")
+        }
       }
     } ~
     path("stop") {

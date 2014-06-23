@@ -36,7 +36,7 @@ class TokenAuthActor extends Actor {
               newToken
           }
         case None =>
-          "invalid user"
+          throw new Exception("invalid user")
       } pipeTo sender
 
     case Token(token) =>

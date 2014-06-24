@@ -15,7 +15,7 @@ class AuthenticatorActor extends Actor with ActorLogging {
   import context.dispatcher
 
   def receive = {
-    case Some(user: UserPass) =>
+    case user: UserPass =>
       val query = BSONDocument(
         "username" -> user.user,
         "password" -> user.pass
@@ -29,8 +29,6 @@ class AuthenticatorActor extends Actor with ActorLogging {
       }
 
       futureResult pipeTo sender
-    case None =>
-      sender ! None
   }
 
 }

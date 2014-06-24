@@ -12,6 +12,7 @@ import spray.http.StatusCodes.Forbidden
 
 import scala.concurrent.duration._
 import scala.util.{Success, Failure}
+import spray.routing.authentication.UserPass
 
 class FloydServiceActor extends HttpServiceActor with ActorLogging {
 
@@ -25,8 +26,7 @@ class FloydServiceActor extends HttpServiceActor with ActorLogging {
     queryStringParameterName = "x_authorization"
   ) { key =>
     implicit val timeout = Timeout(5 seconds)
-    val response = tokenAuthActor ? Token(key)
-    response map { _.asInstanceOf[Option[String]] }
+    (tokenAuthActor ? Token(key)).mapTo[Option[String]]
   }
 
   def auth: Directive1[String] = authenticate(authenticator)
@@ -67,7 +67,7 @@ class FloydServiceActor extends HttpServiceActor with ActorLogging {
       getFromResource("jsClient.html")
     } ~
     path("user" / "login") {
-      formFields('user, 'pass).as(LoginUser) { user =>
+      formFields('user, 'pass).as(UserPass) { user =>
         implicit val timeout = Timeout(5 seconds)
         val futureResult = (tokenAuthActor ? user).mapTo[String]
         onComplete(futureResult) {

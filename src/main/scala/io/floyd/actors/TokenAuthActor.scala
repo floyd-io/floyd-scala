@@ -1,13 +1,12 @@
-package io.floyd
+package io.floyd.actors
 
-import akka.actor.{Props, Actor}
+import akka.actor.{Actor, Props}
 import akka.pattern.{ask, pipe}
 import akka.util.Timeout
-
 import spray.routing.authentication.UserPass
 
-import scala.concurrent.duration._
 import scala.collection.mutable.Map
+import scala.concurrent.duration._
 
 case class Token(token:String)
 

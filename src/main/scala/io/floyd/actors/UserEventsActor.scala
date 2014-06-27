@@ -1,6 +1,6 @@
-package io.floyd
+package io.floyd.actors
 
-import akka.actor.{Props, ActorRef, Actor}
+import akka.actor.{Actor, ActorRef, Props}
 
 case class StartStreamForUser(user: String, client: ActorRef)
 case class UpdateForUser(user:String, data: String)

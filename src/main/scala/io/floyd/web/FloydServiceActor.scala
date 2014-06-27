@@ -1,18 +1,18 @@
-package io.floyd
+package io.floyd.web
 
+import io.floyd.actors._
+
+import spray.http.StatusCodes.Forbidden
+import spray.http.{HttpResponse, _}
+import spray.routing._
+import spray.routing.authentication.UserPass
+import spray.http.MediaTypes._
 import akka.actor._
 import akka.pattern.ask
 import akka.util.Timeout
 
-import spray.routing._
-import spray.http._
-import MediaTypes._
-import spray.http.HttpResponse
-import spray.http.StatusCodes.Forbidden
-
 import scala.concurrent.duration._
-import scala.util.{Success, Failure}
-import spray.routing.authentication.UserPass
+import scala.util.{Failure, Success}
 
 class FloydServiceActor extends HttpServiceActor with ActorLogging {
 

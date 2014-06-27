@@ -1,10 +1,11 @@
-package io.floyd
+package io.floyd.actors
 
 import akka.actor._
-import spray.http.{HttpEntity, ChunkedResponseStart, HttpResponse, MessageChunk, SetRequestTimeout}
-import scala.concurrent.duration._
 import spray.can.Http
 import spray.http.ContentTypes.`application/json`
+import spray.http.{ChunkedResponseStart, HttpEntity, HttpResponse, MessageChunk, SetRequestTimeout}
+
+import scala.concurrent.duration._
 
 case class StartStream()
 

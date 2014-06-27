@@ -1,6 +1,6 @@
-import akka.testkit.TestActorRef
+import io.floyd.actors.EventsActor
 
-import io.floyd.EventsActor
+import akka.testkit.TestActorRef
 
 class TestEventsActor extends BaseUnitTestActor {
 

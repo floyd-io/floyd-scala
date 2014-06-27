@@ -1,6 +1,6 @@
-package io.floyd
+package io.floyd.actors
 
-import akka.actor.{ActorRef, ActorLogging, Actor}
+import akka.actor.{Actor, ActorLogging, ActorRef}
 
 class EventsActor extends Actor with ActorLogging {
 

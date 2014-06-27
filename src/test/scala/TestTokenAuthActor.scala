@@ -1,4 +1,4 @@
-import io.floyd.TokenAuthActor
+import io.floyd.actors.TokenAuthActor
 
 import akka.testkit.TestActorRef
 import spray.routing.authentication.UserPass

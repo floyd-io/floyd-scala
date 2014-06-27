@@ -1,11 +1,10 @@
+import io.floyd.actors.{Update, StartStream, StreamerActor}
+
 import akka.testkit.TestActorRef
 import spray.http.{SetRequestTimeout, ChunkedResponseStart,
   HttpResponse, MessageChunk}
+  
 import scala.concurrent.duration._
-
-import io.floyd.StreamerActor
-import io.floyd.StartStream
-import io.floyd.Update
 
 class TestStreamerActor extends BaseUnitTestActor with UpdateHttpDataMatcher {
 

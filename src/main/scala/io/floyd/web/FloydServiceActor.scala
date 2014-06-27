@@ -39,10 +39,8 @@ class FloydServiceActor extends HttpServiceActor with ActorLogging {
     } ~
     (path("update") & post){
       entity(as[String]) { data =>
-        complete {
-          allEventsActor ! Update(data)
-          "sent update to all-events-actor\n"
-        }
+        allEventsActor ! Update(data)
+        complete { "sent update to all-events-actor\n" }
       }
     } ~
     path("part2.html") { ctx =>
@@ -56,10 +54,8 @@ class FloydServiceActor extends HttpServiceActor with ActorLogging {
     (path("updateUser") & post) {
       auth { user =>
         entity(as[String]) { data =>
-          complete {
-            userEventsActor ! UpdateForUser(user, data)
-            "sent update to user-events-actor\n"
-          }
+          userEventsActor ! UpdateForUser(user, data)
+          complete { "sent update to user-events-actor\n" }
         }
       }
     } ~

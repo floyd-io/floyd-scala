@@ -2,7 +2,7 @@ package io.floyd.web
 
 import io.floyd.actors._
 
-import spray.http.StatusCodes.Forbidden
+import spray.http.StatusCodes.{Forbidden, Conflict}
 import spray.http.{HttpResponse, _}
 import spray.routing._
 import spray.routing.authentication.UserPass
@@ -17,9 +17,11 @@ import scala.util.{Failure, Success}
 class FloydServiceActor extends HttpServiceActor with ActorLogging {
 
   import context.dispatcher // ExecutionContext for the futures and scheduler
+
   val allEventsActor = context.actorOf(Props[EventsActor], "all-events-actor")
   val userEventsActor = context.actorOf(Props[UserEventsActor], "user-events-actor")
   val tokenAuthActor = context.actorOf(Props[TokenAuthActor], "token-auth-actor")
+  val deviceRegisterActor = context.actorOf(Props[DeviceRegisterActor], "device-register-actor")
 
   val authenticator = TokenAuthenticator[String](
     headerName = "X-Authorization",
@@ -69,6 +71,20 @@ class FloydServiceActor extends HttpServiceActor with ActorLogging {
         onComplete(futureResult) {
           case Success(authToken) => complete(authToken)
           case Failure(ex) => complete(Forbidden, s"Invalid User")
+        }
+      }
+    } ~
+    path("device" / "register") {
+      auth { user =>
+        formFields('deviceId, 'serialNumber, 'description) {
+          (deviceId, serialNumber, description) =>
+          implicit val timeout = Timeout(5 seconds)
+          val futureRegistration = deviceRegisterActor ?
+            RegisterDevice(deviceId, serialNumber, description, user)
+          onSuccess(futureRegistration) {
+            case DeviceRegistered => complete("valid registration")
+            case DeviceNotRegistered => complete(Conflict, s"already registered device")
+          }
         }
       }
     } ~

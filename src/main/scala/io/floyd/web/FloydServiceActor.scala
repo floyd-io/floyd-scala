@@ -21,7 +21,7 @@ class FloydServiceActor extends HttpServiceActor with ActorLogging {
   val allEventsActor = context.actorOf(Props[EventsActor], "all-events-actor")
   val userEventsActor = context.actorOf(Props[UserEventsActor], "user-events-actor")
   val tokenAuthActor = context.actorOf(Props[TokenAuthActor], "token-auth-actor")
-  val deviceRegisterActor = context.actorOf(Props[DeviceRegisterActor], "device-register-actor")
+  val deviceRegisterActor = context.actorOf(Props(classOf[DeviceRegisterActor], userEventsActor), "device-register-actor")
 
   val authenticator = TokenAuthenticator[String](
     headerName = "X-Authorization",

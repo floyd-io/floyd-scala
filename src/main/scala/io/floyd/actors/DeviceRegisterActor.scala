@@ -2,7 +2,7 @@ package io.floyd.actors
 
 import io.floyd.db.ReactiveConnection
 
-import akka.actor.{Actor, ActorLogging}
+import akka.actor.{Actor, ActorLogging, ActorRef}
 import akka.pattern.pipe
 import reactivemongo.bson.BSONDocument
 
@@ -11,7 +11,7 @@ case class RegisterDevice(deviceId: String, serialNumber: String, description: S
 case class DeviceRegistered()
 case class DeviceNotRegistered()
 
-class DeviceRegisterActor extends Actor with ActorLogging {
+class DeviceRegisterActor(userActor: ActorRef) extends Actor with ActorLogging {
   val collection = ReactiveConnection.db.apply("devices")
 
   import context.dispatcher
@@ -26,6 +26,9 @@ class DeviceRegisterActor extends Actor with ActorLogging {
       )
 
       collection.insert(device) map { lastError =>
+        userActor ! UpdateForUser(registerDevice.userId,
+          s"device registered = ${registerDevice}"
+        )
         DeviceRegistered
       } recover { case ex =>
         DeviceNotRegistered

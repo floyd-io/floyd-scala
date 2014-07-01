@@ -1,5 +1,5 @@
 import io.floyd.db.ReactiveConnection
-import org.scalatest.{Suite, Matchers, BeforeAndAfterAll}
+import org.scalatest.Matchers
 import reactivemongo.bson.BSONDocument
 import spray.http.{HttpCharsets, HttpData}
 
@@ -7,24 +7,25 @@ import scala.concurrent.Await
 import scala.util.parsing.json.JSON
 import scala.concurrent.duration._
 
-trait InsertOnStartupEmail extends BaseUnitTestActor with BeforeAndAfterAll {
+import java.util.UUID.randomUUID
+
+trait CreateUser {
   import concurrent.ExecutionContext.Implicits.global
-  val document = BSONDocument(
-    "username" -> "testEmail@yahoo.com",
-    "password" -> "password")
 
-  override def beforeAll() = {
-    super.beforeAll()
-
-    val future = ReactiveConnection.db("users").insert(document)
-    Await.result(future, 5 seconds)
-  }
-
-  override def afterAll() {
-    super.afterAll()
-
-    val future = ReactiveConnection.db("users").remove(document)
-    Await.result(future, 5 seconds)
+  def withUser(testcode: String => Any) = {
+    val username = "test " + randomUUID.toString + "@yahoo.com"
+    val document = BSONDocument(
+      "username" -> username,
+      "password" -> "password")
+    try {
+      val future = ReactiveConnection.db("users").insert(document)
+      Await.result(future, 5 seconds)
+      testcode(username)
+    }
+    finally {
+      val future = ReactiveConnection.db("users").remove(document)
+      Await.result(future, 5 seconds)
+    }
   }
 }
 

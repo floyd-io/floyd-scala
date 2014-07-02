@@ -76,11 +76,11 @@ class FloydServiceActor extends HttpServiceActor with ActorLogging {
     } ~
     path("device" / "register") {
       auth { user =>
-        formFields('deviceId, 'serialNumber, 'description) {
-          (deviceId, serialNumber, description) =>
+        formFields('deviceId, 'serialNumber, 'description, 'typeOfDevice) {
+          (deviceId, serialNumber, description, typeOfDevice) =>
           implicit val timeout = Timeout(5 seconds)
           val futureRegistration = deviceRegisterActor ?
-            RegisterDevice(deviceId, serialNumber, description, user)
+            RegisterDevice(deviceId, serialNumber, description, user, typeOfDevice)
           onSuccess(futureRegistration) {
             case DeviceRegistered => complete("valid registration")
             case DeviceNotRegistered => complete(Conflict, s"already registered device")

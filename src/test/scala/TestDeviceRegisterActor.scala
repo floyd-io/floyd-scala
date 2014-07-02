@@ -18,7 +18,7 @@ class TestDeviceRegisterActor extends BaseUnitTestActor with ScalaFutures {
     val testprobe = TestProbe()
     val deviceRegisterActor = TestActorRef(Props(classOf[DeviceRegisterActor], testprobe.ref))
     val registerDeviceMsg =
-      RegisterDevice("111", "020202", "device from tests integration", "user1@yahoo.com")
+      RegisterDevice("111", "020202", "device from tests integration", "user1@yahoo.com", "smartBulb")
 
     deviceRegisterActor ! registerDeviceMsg
     expectMsg(DeviceRegistered)
@@ -37,6 +37,7 @@ class TestDeviceRegisterActor extends BaseUnitTestActor with ScalaFutures {
       device.getAs[String]("serial_number") should be (Some("020202"))
       device.getAs[String]("description") should be (Some("device from tests integration"))
       device.getAs[String]("user_id") should be (Some("user1@yahoo.com"))
+      device.getAs[String]("type_of_device") should be (Some("smartBulb"))
     }
   }
 
@@ -44,10 +45,10 @@ class TestDeviceRegisterActor extends BaseUnitTestActor with ScalaFutures {
     val testProbe = TestProbe()
     val deviceRegister = TestActorRef(Props(classOf[DeviceRegisterActor], testProbe.ref))
     deviceRegister !
-      RegisterDevice("112","020331","device2 from tests integration", "user1@yahoo.com")
+      RegisterDevice("112","020331","device2 from tests integration", "user1@yahoo.com", "smartBulb")
     expectMsg(DeviceRegistered)
     deviceRegister !
-      RegisterDevice("112","020331","device2 from tests integration", "user1@yahoo.com")
+      RegisterDevice("112","020331","device2 from tests integration", "user1@yahoo.com", "smartBulb")
     expectMsg(DeviceNotRegistered)
   }
 

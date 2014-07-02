@@ -35,7 +35,7 @@ Follow these steps to get started:
 
 8. Learn more at http://github.com/floyd-io/wiki , in http://www.spray.io/ and in http://akka.io/
 
-9. Start hacking on src/main/scala/io/floyd/FloydServiceActor.scala
+9. Start hacking on src/main/scala/io/floyd/web/FloydServiceActor.scala
 
 IDEA integration
 ================

@@ -15,27 +15,31 @@ Follow these steps to get started:
 
         $ cd my-project
 
-3. Launch SBT:
+3. Install MongoDB
+ 
+        $ sudo apt-get install mongodb
+
+4. Launch SBT:
 
         $ sbt
 
-4. Compile everything and run all tests:
+5. Compile everything and run all tests:
 
         > test
 
-5. Start the application:
+6. Start the application:
 
         > re-start
 
-6. Browse to [http://localhost:8080](http://localhost:8080/)
+7. Browse to [http://localhost:8080](http://localhost:8080/)
 
-7. Stop the application:
+8. Stop the application:
 
         > re-stop
 
-8. Learn more at http://github.com/floyd-io/wiki , in http://www.spray.io/ and in http://akka.io/
+9. Learn more at http://github.com/floyd-io/wiki , in http://www.spray.io/ and in http://akka.io/
 
-9. Start hacking on src/main/scala/io/floyd/FloydServiceActor.scala
+10. Start hacking on src/main/scala/io/floyd/web/FloydServiceActor.scala
 
 IDEA integration
 ================

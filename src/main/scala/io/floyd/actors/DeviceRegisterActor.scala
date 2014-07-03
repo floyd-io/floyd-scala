@@ -1,6 +1,7 @@
 package io.floyd.actors
 
 import io.floyd.db.ReactiveConnection
+import io.floyd.events.UpdateForUser
 
 import akka.actor.{Actor, ActorLogging, ActorRef}
 import akka.pattern.pipe

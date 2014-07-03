@@ -1,4 +1,4 @@
-package io.floyd.actors
+package io.floyd.events
 
 import akka.actor._
 import spray.can.Http

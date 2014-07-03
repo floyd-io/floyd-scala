@@ -31,7 +31,7 @@ Follow these steps to get started:
 
         > re-start
 
-7. Browse to [http://localhost:8080](http://localhost:1337/)
+7. Browse to [http://localhost:1337](http://localhost:1337/)
 
 8. Stop the application:
 

@@ -1,4 +1,4 @@
-import io.floyd.actors.{UpdateForUser, StartStreamForUser, UserEventsActor}
+import io.floyd.events.{UpdateForUser, StartStreamForUser, UserEventsActor}
 
 import akka.testkit.{TestProbe, TestActorRef}
 import spray.http.MessageChunk

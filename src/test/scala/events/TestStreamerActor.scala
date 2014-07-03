@@ -1,4 +1,4 @@
-import io.floyd.actors.{Update, StartStream, StreamerActor}
+import io.floyd.events.{StreamerActor, Update, StartStream}
 
 import akka.testkit.TestActorRef
 import spray.http.{SetRequestTimeout, ChunkedResponseStart,

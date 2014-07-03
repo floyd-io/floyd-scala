@@ -1,7 +1,6 @@
 package io.floyd.events
 
 import akka.actor.{Actor, ActorLogging, ActorRef}
-import io.floyd.actors.{StartStream, Update}
 
 trait NamedChilds extends Actor {
   val nextValue = Iterator.from(1)

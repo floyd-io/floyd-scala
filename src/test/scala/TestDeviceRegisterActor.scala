@@ -1,5 +1,6 @@
 import io.floyd.actors.{DeviceNotRegistered, DeviceRegistered, RegisterDevice,
-  DeviceRegisterActor, UpdateForUser}
+  DeviceRegisterActor}
+import io.floyd.events.UpdateForUser
 import io.floyd.db.ReactiveConnection
 
 import akka.actor.Props

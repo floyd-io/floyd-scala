@@ -1,4 +1,4 @@
-import io.floyd.actors.{Update, EventsActor}
+import io.floyd.events.{Update, EventsActor}
 
 import akka.actor.Props
 import akka.testkit.TestProbe

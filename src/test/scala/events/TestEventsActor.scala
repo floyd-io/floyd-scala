@@ -1,4 +1,4 @@
-import io.floyd.actors.EventsActor
+import io.floyd.events.EventsActor
 
 import akka.testkit.TestActorRef
 

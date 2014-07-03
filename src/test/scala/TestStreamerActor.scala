@@ -21,9 +21,6 @@ class TestStreamerActor extends BaseUnitTestActor with UpdateHttpDataMatcher {
   "StreamerActor" should "send JSON updates to its client" in {
     val actorRef = TestActorRef(StreamerActor.props(self))
     actorRef ! Update("test")
-    expectMsgPF() {
-      case MessageChunk(data, extension) => 
-        jsonShouldBe(data, "test")
-    }
+    expectMsgChunk("test")
   }
 }

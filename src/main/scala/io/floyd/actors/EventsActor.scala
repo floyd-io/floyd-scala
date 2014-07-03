@@ -2,18 +2,19 @@ package io.floyd.actors
 
 import akka.actor.{Actor, ActorLogging, ActorRef}
 
-class EventsActor extends Actor with ActorLogging {
-
+trait NamedChilds extends Actor {
   val nextValue = Iterator.from(1)
 
-  def createStreamer(client:ActorRef) = {
-    val newActor = context.actorOf(StreamerActor.props(client), createNameOfStreamer())
-    log.debug("new actor " + newActor.toString())
-    newActor ! StartStream()
-  }
+  def createNameOfStreamer() = "stream" + nextValue.next()
 
-  def createNameOfStreamer() = {
-    "stream" + nextValue.next()
+  def createChild(client: ActorRef) =
+    context.actorOf(StreamerActor.props(client), createNameOfStreamer())
+}
+
+class EventsActor extends Actor with ActorLogging with  NamedChilds {
+
+  def createStreamer(client:ActorRef) = {
+    createChild(client) ! StartStream()
   }
 
   override def receive: Receive = {

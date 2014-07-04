@@ -1,23 +1,21 @@
 package io.floyd.events
 
-import akka.actor.{Actor, ActorRef, Props}
+import akka.actor.{Actor, ActorRef}
 
 case class StartStreamForUser(user: String, client: ActorRef)
 case class UpdateForUser(user:String, data: String)
 
-class UserEventsActor extends Actor {
+class UserEventsActor extends Actor with NamedStreamChilds {
+
+  val lookupBus = LookupBusImpl.instance
+
   def receive = {
     case StartStreamForUser(user, client) =>
-      context.child(user) match {
-        case Some(actor) => actor ! client
-        case None =>
-          val eventsActor = context.actorOf(Props[EventsActor], user)
-          eventsActor ! client
-      }
+      val newStreamActor = createChild(client)
+      newStreamActor ! StartStream()
+      lookupBus.subscribe(newStreamActor, "user="+user)
     case UpdateForUser(user, data) =>
-      context.child(user) foreach { actor =>
-        actor ! Update(data)
-      }
+      lookupBus.publish(MsgEnvelope("user="+user, Update(data)))
   }
 
 }

@@ -4,7 +4,7 @@ import akka.actor.{Actor, ActorRef}
 
 case class CreateStreamDevice(deviceId: String, actor: ActorRef)
 
-class DeviceEventsActor extends NamedChilds {
+class DeviceEventsActor extends NamedStreamChilds {
   def receive = {
     case CreateStreamDevice(deviceId, actor) =>
       val newActor = createChild(actor)

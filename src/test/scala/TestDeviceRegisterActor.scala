@@ -1,6 +1,6 @@
 import io.floyd.actors.{DeviceNotRegistered, DeviceRegistered, RegisterDevice,
   DeviceRegisterActor}
-import io.floyd.events.UpdateForUser
+import io.floyd.events.{Update, LookupBusImpl}
 import io.floyd.db.ReactiveConnection
 
 import akka.actor.Props
@@ -14,18 +14,19 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 class TestDeviceRegisterActor extends BaseUnitTestActor with ScalaFutures {
   val devices = ReactiveConnection.db("devices")
+  val lookupbus = LookupBusImpl.instance
 
   "DeviceRegisterActor" should "insert a device in the DB and send an update to the stream" in {
     val testprobe = TestProbe()
-    val deviceRegisterActor = TestActorRef(Props(classOf[DeviceRegisterActor], testprobe.ref))
+    lookupbus.subscribe(testprobe.ref, "user=user1@yahoo.com")
+    val deviceRegisterActor = TestActorRef[DeviceRegisterActor]
     val registerDeviceMsg =
       RegisterDevice("111", "020202", "device from tests integration", "user1@yahoo.com", "smartBulb")
 
     deviceRegisterActor ! registerDeviceMsg
     expectMsg(DeviceRegistered)
 
-    val update = testprobe.expectMsgClass(classOf[UpdateForUser])
-    update.user should be ("user1@yahoo.com")
+    val update = testprobe.expectMsgClass(classOf[Update])
     update.data should be (s"device registered = $registerDeviceMsg")
 
     val futureList = devices.find(BSONDocument("_id" -> "111")).
@@ -43,8 +44,7 @@ class TestDeviceRegisterActor extends BaseUnitTestActor with ScalaFutures {
   }
 
   "DeviceRegisterActor" should "give an error when a user is in the DB" in {
-    val testProbe = TestProbe()
-    val deviceRegister = TestActorRef(Props(classOf[DeviceRegisterActor], testProbe.ref))
+    val deviceRegister =  TestActorRef[DeviceRegisterActor]
     deviceRegister !
       RegisterDevice("112","020331","device2 from tests integration", "user1@yahoo.com", "smartBulb")
     expectMsg(DeviceRegistered)

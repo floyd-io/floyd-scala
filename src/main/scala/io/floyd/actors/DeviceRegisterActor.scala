@@ -1,7 +1,7 @@
 package io.floyd.actors
 
 import io.floyd.db.ReactiveConnection
-import io.floyd.events.UpdateForUser
+import io.floyd.events.{MsgEnvelope, LookupBusImpl, Update}
 
 import akka.actor.{Actor, ActorLogging, ActorRef}
 import akka.pattern.pipe
@@ -15,10 +15,12 @@ case class RegisterDevice(deviceId: String, serialNumber: String,
 case class DeviceRegistered()
 case class DeviceNotRegistered()
 
-class DeviceRegisterActor(userActor: ActorRef) extends Actor with ActorLogging {
+class DeviceRegisterActor extends Actor with ActorLogging {
   val collection = ReactiveConnection.db.apply("devices")
 
   import context.dispatcher
+
+  val lookupbus = LookupBusImpl.instance
 
   def receive = {
     case registerDevice: RegisterDevice =>
@@ -31,8 +33,10 @@ class DeviceRegisterActor(userActor: ActorRef) extends Actor with ActorLogging {
       )
 
       collection.insert(device) map { lastError =>
-        userActor ! UpdateForUser(registerDevice.userId,
-          s"device registered = ${registerDevice}"
+        lookupbus.publish(
+          MsgEnvelope("user="+ registerDevice.userId,
+            Update(s"device registered = ${registerDevice}")
+          )
         )
         DeviceRegistered
       } recover { case ex =>

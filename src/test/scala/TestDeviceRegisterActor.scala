@@ -1,6 +1,6 @@
 import io.floyd.actors.{DeviceNotRegistered, DeviceRegistered, RegisterDevice,
   DeviceRegisterActor}
-import io.floyd.events.{Update, LookupBusImpl}
+import io.floyd.events.{RegisterListener, LookupBusImpl}
 import io.floyd.db.ReactiveConnection
 
 import akka.actor.Props
@@ -26,8 +26,8 @@ class TestDeviceRegisterActor extends BaseUnitTestActor with ScalaFutures {
     deviceRegisterActor ! registerDeviceMsg
     expectMsg(DeviceRegistered)
 
-    val update = testprobe.expectMsgClass(classOf[Update])
-    update.data should be (s"device registered = $registerDeviceMsg")
+    val update = testprobe.expectMsgClass(classOf[RegisterListener])
+    update.selector should be (s"device=111")
 
     val futureList = devices.find(BSONDocument("_id" -> "111")).
       cursor[BSONDocument].collect[List]()

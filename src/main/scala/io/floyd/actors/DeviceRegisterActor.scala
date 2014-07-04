@@ -34,9 +34,7 @@ class DeviceRegisterActor extends Actor with ActorLogging {
 
       collection.insert(device) map { lastError =>
         val register = RegisterListener("device="+registerDevice.deviceId)
-        lookupbus.publish(
-          MsgEnvelope("user="+ registerDevice.userId, register)
-        )
+        lookupbus.publish(MsgEnvelope("user="+ registerDevice.userId, register))
         DeviceRegistered
       } recover { case ex =>
         DeviceNotRegistered

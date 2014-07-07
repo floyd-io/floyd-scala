@@ -1,11 +1,10 @@
-package io.floyd
-
-import io.floyd.db.ReactiveConnection
+package io.floyd.actors
 
 import akka.actor.{Actor, ActorLogging}
 import akka.pattern.pipe
-import spray.routing.authentication.UserPass
+import io.floyd.db.ReactiveConnection
 import reactivemongo.bson._
+import spray.routing.authentication.UserPass
 
 import scala.concurrent._
 

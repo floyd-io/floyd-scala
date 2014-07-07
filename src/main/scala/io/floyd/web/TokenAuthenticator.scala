@@ -1,8 +1,9 @@
-package io.floyd
+package io.floyd.web
+
+import spray.routing.authentication.{Authentication, ContextAuthenticator}
+import spray.routing.{AuthenticationFailedRejection, RequestContext}
 
 import scala.concurrent.{ExecutionContext, Future}
-import spray.routing.{AuthenticationFailedRejection, RequestContext}
-import spray.routing.authentication.{Authentication, ContextAuthenticator}
 
 /** Token based authentication for Spray Routing.
   *
@@ -51,7 +52,7 @@ object TokenAuthenticator {
   class TokenAuthenticator[T](extractor: TokenExtraction.TokenExtractor, authenticator: (String => Future[Option[T]]))
                              (implicit executionContext: ExecutionContext) extends ContextAuthenticator[T] {
 
-    import AuthenticationFailedRejection._
+    import spray.routing.AuthenticationFailedRejection._
 
     def apply(context: RequestContext): Future[Authentication[T]] =
       extractor(context) match {

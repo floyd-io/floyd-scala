@@ -1,33 +1,56 @@
-package io.floyd
+package io.floyd.web
 
+import io.floyd.actors._
+import io.floyd.events._
+
+import spray.http.StatusCodes.{Forbidden, Conflict}
+import spray.http.{HttpResponse, _}
+import spray.routing._
+import spray.routing.authentication.UserPass
+import spray.http.MediaTypes._
+import spray.routing.authentication._
 import akka.actor._
 import akka.pattern.ask
 import akka.util.Timeout
 
-import spray.routing._
-import spray.http._
-import MediaTypes._
-import spray.http.HttpResponse
-import spray.http.StatusCodes.Forbidden
-
 import scala.concurrent.duration._
-import scala.util.{Success, Failure}
-import spray.routing.authentication.UserPass
+import scala.concurrent.Future
+import scala.util.{Failure, Success}
 
 class FloydServiceActor extends HttpServiceActor with ActorLogging {
 
   import context.dispatcher // ExecutionContext for the futures and scheduler
+
   val allEventsActor = context.actorOf(Props[EventsActor], "all-events-actor")
   val userEventsActor = context.actorOf(Props[UserEventsActor], "user-events-actor")
   val tokenAuthActor = context.actorOf(Props[TokenAuthActor], "token-auth-actor")
+  val deviceRegisterActor = context.actorOf(Props[DeviceRegisterActor], "device-register-actor")
+  val deviceAuthActor = context.actorOf(Props[DeviceAuthActor], "device-auth-actor")
+  val deviceEventsActor = context.actorOf(Props[DeviceEventsActor], "devices-events-actor")
+
+  val lookupBus = LookupBusImpl.instance
+  implicit val timeout = Timeout(5 seconds)
 
   val authenticator = TokenAuthenticator[String](
     headerName = "X-Authorization",
     queryStringParameterName = "x_authorization"
   ) { key =>
-    implicit val timeout = Timeout(5 seconds)
     (tokenAuthActor ? Token(key)).mapTo[Option[String]]
   }
+
+  def authenticatorDevice(context: RequestContext): Future[Authentication[String]] = {
+    val deviceId = context.request.uri.query.get("id")
+    val serial = context.request.uri.query.get("serial")
+    (deviceId, serial) match {
+      case (Some(deviceId), Some(serial)) =>
+        (deviceAuthActor ? DeviceId(deviceId,serial)).mapTo[Authentication[String]]
+      case _ =>
+        Future {
+          Left(MissingQueryParamRejection("id,serial"))
+        }
+    }
+  }
+  def authDevice: Directive1[String] = authenticate(authenticatorDevice _)
 
   def auth: Directive1[String] = authenticate(authenticator)
 
@@ -39,10 +62,8 @@ class FloydServiceActor extends HttpServiceActor with ActorLogging {
     } ~
     (path("update") & post){
       entity(as[String]) { data =>
-        complete {
-          allEventsActor ! Update(data)
-          "sent update to all-events-actor\n"
-        }
+        allEventsActor ! Update(data)
+        complete { "sent update to all-events-actor\n" }
       }
     } ~
     path("part2.html") { ctx =>
@@ -56,10 +77,8 @@ class FloydServiceActor extends HttpServiceActor with ActorLogging {
     (path("updateUser") & post) {
       auth { user =>
         entity(as[String]) { data =>
-          complete {
-            userEventsActor ! UpdateForUser(user, data)
-            "sent update to user-events-actor\n"
-          }
+          userEventsActor ! UpdateForUser(user, data)
+          complete { "sent update to user-events-actor\n" }
         }
       }
     } ~
@@ -68,11 +87,37 @@ class FloydServiceActor extends HttpServiceActor with ActorLogging {
     } ~
     path("user" / "login") {
       formFields('user, 'pass).as(UserPass) { user =>
-        implicit val timeout = Timeout(5 seconds)
         val futureResult = (tokenAuthActor ? user).mapTo[String]
         onComplete(futureResult) {
           case Success(authToken) => complete(authToken)
           case Failure(ex) => complete(Forbidden, s"Invalid User")
+        }
+      }
+    } ~
+    path("device" / "register") {
+      auth { user =>
+        formFields('deviceId, 'serialNumber, 'description, 'typeOfDevice) {
+          (deviceId, serialNumber, description, typeOfDevice) =>
+          val futureRegistration = deviceRegisterActor ?
+            RegisterDevice(deviceId, serialNumber, description, user, typeOfDevice)
+          onSuccess(futureRegistration) {
+            case DeviceRegistered => complete("valid registration")
+            case DeviceNotRegistered => complete(Conflict, s"already registered device")
+          }
+        }
+      }
+    } ~
+    (path("device" / "update") & post) {
+      authDevice { device =>
+        entity(as[String]) { data =>
+          lookupBus.publish(MsgEnvelope("device=" + device, Update(data)))
+          complete("update sent")
+        }
+      }
+    } ~
+    path("device" / "announce") {
+      authDevice { device => { ctx =>
+          deviceEventsActor ! CreateStreamDevice(device, ctx.responder)
         }
       }
     } ~

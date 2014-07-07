@@ -1,8 +1,7 @@
+import io.floyd.events.{Update, EventsActor}
+
 import akka.actor.Props
 import akka.testkit.TestProbe
-
-import io.floyd.EventsActor
-import io.floyd.Update
 import spray.http.MessageChunk
 
 class TestUpdatesIntegration extends BaseUnitTestActor with UpdateHttpDataMatcher {

@@ -10,7 +10,7 @@ import scala.util.parsing.json.JSON
 abstract class BaseUnitTestActor extends TestKit(ActorSystem()) with ImplicitSender 
   with FlatSpecLike with Matchers with BeforeAndAfterAll {
 
-  override def afterAll {
+  override def afterAll() = {
     shutdown(verifySystemShutdown = true)
   }
 }

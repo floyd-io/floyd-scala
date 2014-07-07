@@ -43,7 +43,7 @@ class TestDeviceRegisterActor extends BaseUnitTestActor with ScalaFutures {
     }
   }
 
-  "DeviceRegisterActor" should "give an error when a user is in the DB" in {
+  "DeviceRegisterActor" should "give an error when a device is registered twice" in {
     val deviceRegister =  TestActorRef[DeviceRegisterActor]
     deviceRegister !
       RegisterDevice("112","020331","device2 from tests integration", "user1@yahoo.com", "smartBulb")

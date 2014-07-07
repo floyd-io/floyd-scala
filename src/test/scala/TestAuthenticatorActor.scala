@@ -7,9 +7,9 @@ import spray.routing.authentication.UserPass
 class TestAuthenticatorActor extends BaseUnitTestActor with CreateUser {
   val authenticator = TestActorRef[AuthenticatorActor]
 
-  "AuthenticatorActor" should "validate correct user in DB with Some(username)" in withUser { user =>
+  "AuthenticatorActor" should "validate correct user in DB with Some(id)" in withUser { user =>
     authenticator ! UserPass(user, "password")
-    expectMsg(Some(user))
+    expectMsgClass(classOf[String])
   }
 
   "Authenticator" should "invalidate inexistant user in DB with None" in withUser { user =>

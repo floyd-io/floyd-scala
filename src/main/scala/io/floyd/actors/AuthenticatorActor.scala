@@ -23,7 +23,8 @@ class AuthenticatorActor extends Actor with ActorLogging {
         cursor[BSONDocument].collect[List]()
 
       val futureResult: Future[Any] = futureList map {
-        case userFound :: tail => Some(user.user)
+        case userFound :: tail =>
+          userFound.getAs[BSONObjectID]("_id").get.stringify
         case Nil => None
       }
 

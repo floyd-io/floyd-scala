@@ -7,16 +7,18 @@ class TestTokenAuthActor extends BaseUnitTestActor with CreateUser {
   "TokenAuthActor" should "give valid UUID for valid user" in withUser { user =>
     val tokenAuthActor = TestActorRef[TokenAuthActor]
     tokenAuthActor ! UserPass(user, "password")
-    val authToken = expectMsgClass(classOf[String])
+    val (authToken, id) = expectMsgClass(classOf[Tuple2[String,String]])
     authToken should fullyMatch regex "(\\w{8}(-\\w{4}){3}-\\w{12}?)".r
   }
 
-  "TokenAuthActor" should "give valid same UUID for same user" in withUser { user =>
+  "TokenAuthActor" should "give valid another UUID for same user" in withUser { user =>
     val tokenAuthActor = TestActorRef[TokenAuthActor]
     tokenAuthActor ! UserPass(user, "password")
-    val authToken = expectMsgClass(classOf[String])
+    val (authToken, id) = expectMsgClass(classOf[Tuple2[String,String]])
     tokenAuthActor ! UserPass(user, "password")
-    expectMsg(authToken)
+    val (authToken2, id2) = expectMsgClass(classOf[Tuple2[String,String]])
+    authToken should not be (authToken2)
+    id should be (id2)
   }
 
   "TokenAuthActor" should "give Exception for invalid user" in withUser { user =>

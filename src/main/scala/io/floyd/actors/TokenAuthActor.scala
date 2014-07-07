@@ -8,7 +8,7 @@ import spray.routing.authentication.UserPass
 import scala.collection.mutable.Map
 import scala.concurrent.duration._
 
-case class Token(token:String)
+case class Token(token:String, userId: String)
 
 class TokenAuthActor extends Actor {
 
@@ -22,22 +22,15 @@ class TokenAuthActor extends Actor {
       implicit val timeout = Timeout(5 seconds)
       val futureResult = authenticatorActor ? user
       futureResult map {
-        case Some(userFound) =>
-          val tokensFound = (tokensUsers filter {
-            case (_, username) => username == userFound
-          }).keys.toList
-          tokensFound match {
-            case token :: tail => token
-            case Nil =>
-              val newToken = java.util.UUID.randomUUID.toString()
-              tokensUsers += (newToken -> user.user)
-              newToken
-          }
+        case id: String =>
+          val newToken = java.util.UUID.randomUUID.toString()
+          tokensUsers += (newToken -> id)
+          newToken -> id
         case None =>
           throw new Exception("invalid user")
       } pipeTo sender
 
-    case Token(token) =>
+    case token:String =>
       sender ! tokensUsers.get(token)
   }
 

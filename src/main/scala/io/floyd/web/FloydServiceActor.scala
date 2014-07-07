@@ -4,9 +4,8 @@ import io.floyd.actors._
 import io.floyd.events._
 
 import spray.http.StatusCodes.{Forbidden, Conflict}
-import spray.http.{HttpResponse, _}
+import spray.http._
 import spray.routing._
-import spray.routing.authentication.UserPass
 import spray.http.MediaTypes._
 import spray.routing.authentication._
 import akka.actor._
@@ -35,7 +34,7 @@ class FloydServiceActor extends HttpServiceActor with ActorLogging {
     headerName = "X-Authorization",
     queryStringParameterName = "x_authorization"
   ) { key =>
-    (tokenAuthActor ? Token(key)).mapTo[Option[String]]
+    (tokenAuthActor ? key).mapTo[Option[String]]
   }
 
   def authenticatorDevice(context: RequestContext): Future[Authentication[String]] = {
@@ -85,11 +84,15 @@ class FloydServiceActor extends HttpServiceActor with ActorLogging {
     path("jsclient.html") {
       getFromResource("jsClient.html")
     } ~
-    path("user" / "login") {
+    path("user" / "session") {
       formFields('user, 'pass).as(UserPass) { user =>
-        val futureResult = (tokenAuthActor ? user).mapTo[String]
+        val futureResult = (tokenAuthActor ? user).mapTo[Tuple2[String,String]]
         onComplete(futureResult) {
-          case Success(authToken) => complete(authToken)
+          case Success((authToken,id)) => complete(
+                 s"""{
+               |"token":"${authToken}"
+               |"id": "${id}"
+               |}""".stripMargin)
           case Failure(ex) => complete(Forbidden, s"Invalid User")
         }
       }

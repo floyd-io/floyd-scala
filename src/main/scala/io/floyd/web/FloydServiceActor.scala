@@ -11,6 +11,8 @@ import spray.routing.authentication._
 import akka.actor._
 import akka.pattern.ask
 import akka.util.Timeout
+import org.json4s.JsonDSL._
+import org.json4s.native.JsonMethods._
 
 import scala.concurrent.duration._
 import scala.concurrent.Future
@@ -88,11 +90,9 @@ class FloydServiceActor extends HttpServiceActor with ActorLogging {
       formFields('user, 'pass).as(UserPass) { user =>
         val futureResult = (tokenAuthActor ? user).mapTo[Tuple2[String,String]]
         onComplete(futureResult) {
-          case Success((authToken,id)) => complete(
-                 s"""{
-               |"token":"${authToken}"
-               |"id": "${id}"
-               |}""".stripMargin)
+          case Success((authToken,id)) =>
+            val map = Map("token"->authToken,"id"->id)
+            complete(compact(render(map)))
           case Failure(ex) => complete(Forbidden, s"Invalid User")
         }
       }

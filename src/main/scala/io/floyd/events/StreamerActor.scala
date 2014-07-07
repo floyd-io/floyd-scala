@@ -4,6 +4,8 @@ import akka.actor._
 import spray.can.Http
 import spray.http.ContentTypes.`application/json`
 import spray.http.{ChunkedResponseStart, HttpEntity, HttpResponse, MessageChunk, SetRequestTimeout}
+import org.json4s.JsonDSL._
+import org.json4s.native.JsonMethods._
 
 import scala.concurrent.duration._
 
@@ -38,7 +40,8 @@ class StreamerActor(client: ActorRef) extends Actor with ActorLogging {
   }
 
   def updateData(data:String) = {
-    s"""{ "data":"${data}" }\n"""
+    val map = Map("data"->data)
+    compact(render(map))
   }
 
 }

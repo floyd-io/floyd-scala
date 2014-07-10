@@ -7,43 +7,35 @@ class TestUserEventsActor extends BaseUnitTestActor with UpdateHttpDataMatcher {
   "UserEventsActor" should "create one stream for one message start" in {
     val userEventsActor = TestActorRef[UserEventsActor]
     val testprobe1 = TestProbe()
-    userEventsActor.children.size should be (0)
     userEventsActor ! StartStreamForUser("user1@hotmail.com", testprobe1.ref)
-    userEventsActor.children.size should be (1)
-    testprobe1.receiveN(2)
+    testprobe1.receiveN(4)
   }
 
   "UserEventsActor" should "create two actor streams for two streams message start" in {
     val userEventsActor = TestActorRef[UserEventsActor]
     val testprobe1 = TestProbe()
     val testprobe2 = TestProbe()
-    userEventsActor.children.size should be (0)
     userEventsActor ! StartStreamForUser("user1@hotmail.com", testprobe1.ref)
-    userEventsActor.children.size should be (1)
     userEventsActor ! StartStreamForUser("user1@hotmail.com", testprobe2.ref)
-    userEventsActor.children.size should be (2)
-    testprobe1.receiveN(2)
-    testprobe2.receiveN(2)
+    testprobe1.receiveN(4)
+    testprobe2.receiveN(4)
   }
 
   "UserEventsActor" should "create two streams for different users" in {
     val userEventsActor = TestActorRef[UserEventsActor]
     val testprobe1 = TestProbe()
     val testprobe2 = TestProbe()
-    userEventsActor.children.size should be (0)
     userEventsActor ! StartStreamForUser("user1@hotmail.com", testprobe1.ref)
-    userEventsActor.children.size should be (1)
     userEventsActor ! StartStreamForUser("user2@hotmail.com", testprobe2.ref)
-    userEventsActor.children.size should be (2)
-    testprobe1.receiveN(2)
-    testprobe2.receiveN(2)
+    testprobe1.receiveN(4)
+    testprobe2.receiveN(4)
   }
 
   "UserEventsActor" should "send update to the correct user" in {
     val userEventsActor = TestActorRef[UserEventsActor]
     val testprobe1 = TestProbe()
     userEventsActor ! StartStreamForUser("user1@hotmail.com", testprobe1.ref)
-    testprobe1.receiveN(2)
+    testprobe1.receiveN(4)
     userEventsActor ! UpdateForUser("user1@hotmail.com", "update")
     testprobe1.expectMsgPF() {
       case MessageChunk(data, extension) =>

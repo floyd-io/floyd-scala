@@ -1,7 +1,7 @@
 import io.floyd.db.ReactiveConnection
 
 import org.scalatest.Matchers
-import reactivemongo.bson.BSONDocument
+import reactivemongo.bson.{BSONDocument, BSONObjectID}
 import spray.http.{MessageChunk, HttpCharsets, HttpData}
 import akka.testkit.TestKitBase
 
@@ -14,15 +14,17 @@ import java.util.UUID.randomUUID
 trait CreateUser {
   import concurrent.ExecutionContext.Implicits.global
 
-  def withUser(testcode: String => Any) = {
-    val username = "test " + randomUUID.toString + "@yahoo.com"
+  def withUser(testcode: (String, String) => Any) = {
+    val username = "test_" + randomUUID.toString + "@yahoo.com"
+    val id = BSONObjectID.generate
     val document = BSONDocument(
+      "_id" -> id,
       "username" -> username,
       "password" -> "password")
     try {
       val future = ReactiveConnection.db("users").insert(document)
       Await.result(future, 5 seconds)
-      testcode(username)
+      testcode(username, id stringify)
     }
     finally {
       val future = ReactiveConnection.db("users").remove(document)

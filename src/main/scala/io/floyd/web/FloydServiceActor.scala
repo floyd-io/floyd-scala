@@ -43,8 +43,8 @@ class FloydServiceActor extends HttpServiceActor with ActorLogging {
     val deviceId = context.request.uri.query.get("id")
     val serial = context.request.uri.query.get("serial")
     (deviceId, serial) match {
-      case (Some(deviceId), Some(serial)) =>
-        (deviceAuthActor ? DeviceId(deviceId,serial)).mapTo[Authentication[String]]
+      case (Some(deviceIdValue), Some(serialValue)) =>
+        (deviceAuthActor ? DeviceId(deviceIdValue,serialValue)).mapTo[Authentication[String]]
       case _ =>
         Future {
           Left(MissingQueryParamRejection("id,serial"))
@@ -70,9 +70,11 @@ class FloydServiceActor extends HttpServiceActor with ActorLogging {
     path("part2.html") { ctx =>
       allEventsActor ! ctx.responder
     } ~
-    path("stream") {
-      auth { user => ctx =>
-        userEventsActor ! StartStreamForUser(user, ctx.responder)
+    (pathPrefix("user") & auth) { user =>
+      (pathPrefix("me") | pathPrefix(user)) {
+        path ("devices") { ctx =>
+          userEventsActor ! StartStreamForUser(user, ctx.responder)
+        }
       }
     } ~
     (path("updateUser") & post) {

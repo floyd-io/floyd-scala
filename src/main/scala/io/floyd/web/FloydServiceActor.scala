@@ -55,7 +55,7 @@ class FloydServiceActor extends HttpServiceActor with ActorLogging {
 
   def auth: Directive1[String] = authenticate(authenticator)
 
-  def receive = runRoute {
+  val route =
     path("ping") {
       complete {
         "PONG"
@@ -70,10 +70,23 @@ class FloydServiceActor extends HttpServiceActor with ActorLogging {
     path("part2.html") { ctx =>
       allEventsActor ! ctx.responder
     } ~
-    (pathPrefix("user") & auth) { user =>
-      (pathPrefix("me") | pathPrefix(user)) {
-        path ("devices") { ctx =>
-          userEventsActor ! StartStreamForUser(user, ctx.responder)
+    pathPrefix("user") {
+      auth { user =>
+        (pathPrefix("me") | pathPrefix(user)) {
+          path ("devices") { ctx =>
+            userEventsActor ! StartStreamForUser(user, ctx.responder)
+          }
+        }
+      } ~
+      path( "session") {
+        formFields('user, 'pass).as(UserPass) { user =>
+          val futureResult = (tokenAuthActor ? user).mapTo[Tuple2[String,String]]
+          onComplete(futureResult) {
+            case Success((authToken,id)) =>
+              val map = Map("token"->authToken,"id"->id)
+              complete(compact(render(map)))
+            case Failure(ex) => complete(Forbidden, s"Invalid User")
+          }
         }
       }
     } ~
@@ -87,17 +100,6 @@ class FloydServiceActor extends HttpServiceActor with ActorLogging {
     } ~
     path("jsclient.html") {
       getFromResource("jsClient.html")
-    } ~
-    path("user" / "session") {
-      formFields('user, 'pass).as(UserPass) { user =>
-        val futureResult = (tokenAuthActor ? user).mapTo[Tuple2[String,String]]
-        onComplete(futureResult) {
-          case Success((authToken,id)) =>
-            val map = Map("token"->authToken,"id"->id)
-            complete(compact(render(map)))
-          case Failure(ex) => complete(Forbidden, s"Invalid User")
-        }
-      }
     } ~
     path("device" / "register") {
       auth { userId =>
@@ -142,7 +144,8 @@ class FloydServiceActor extends HttpServiceActor with ActorLogging {
         index
       }
     }
-  }
+
+  def receive = runRoute (route)
 
   lazy val index = HttpResponse(
     entity = HttpEntity(`text/html`,

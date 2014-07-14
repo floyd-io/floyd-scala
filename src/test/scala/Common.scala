@@ -27,6 +27,10 @@ trait CreateUser {
       testcode(username, id stringify)
     }
     finally {
+      val deleteDevices = ReactiveConnection.db("devices").remove(BSONDocument(
+        "user_id"-> id
+      ))
+      Await.result(deleteDevices, 5 seconds)
       val future = ReactiveConnection.db("users").remove(document)
       Await.result(future, 5 seconds)
     }

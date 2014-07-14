@@ -1,8 +1,7 @@
-package io.floyd.actors
+package io.floyd.db
 
 import akka.actor.{Actor, ActorLogging}
 import akka.pattern.pipe
-import io.floyd.db.ReactiveConnection
 import reactivemongo.bson._
 import spray.routing.authentication.UserPass
 

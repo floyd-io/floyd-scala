@@ -1,5 +1,5 @@
 import io.floyd.db.ReactiveConnection
-import io.floyd.actors.{DevicesActor, Device}
+import io.floyd.db.{DevicesActor, Device}
 
 import reactivemongo.bson.BSONDocument
 import akka.testkit.TestActorRef

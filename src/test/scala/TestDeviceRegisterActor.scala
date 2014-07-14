@@ -1,4 +1,4 @@
-import io.floyd.actors.{DeviceNotRegistered, DeviceRegistered, RegisterDevice,
+import io.floyd.db.{DeviceNotRegistered, DeviceRegistered, RegisterDevice,
   DeviceRegisterActor}
 import io.floyd.events.{RegisterListener, LookupBusImpl}
 import io.floyd.db.ReactiveConnection

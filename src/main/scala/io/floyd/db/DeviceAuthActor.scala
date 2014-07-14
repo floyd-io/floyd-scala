@@ -1,6 +1,4 @@
-package io.floyd.actors
-
-import io.floyd.db.ReactiveConnection
+package io.floyd.db
 
 import spray.routing.AuthorizationFailedRejection
 import akka.actor.Actor

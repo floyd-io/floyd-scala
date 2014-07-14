@@ -2,6 +2,7 @@ package io.floyd.web
 
 import io.floyd.actors._
 import io.floyd.events._
+import io.floyd.db._
 
 import spray.http.StatusCodes.{Forbidden, Conflict}
 import spray.http._

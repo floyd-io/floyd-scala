@@ -1,6 +1,5 @@
-package io.floyd.actors
+package io.floyd.db
 
-import io.floyd.db.ReactiveConnection
 import io.floyd.events.{MsgEnvelope, LookupBusImpl, RegisterListener}
 
 import akka.actor.{Actor, ActorLogging, ActorRef}

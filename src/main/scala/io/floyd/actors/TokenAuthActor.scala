@@ -1,5 +1,7 @@
 package io.floyd.actors
 
+import io.floyd.db.AuthenticatorActor
+
 import akka.actor.{Actor, Props}
 import akka.pattern.{ask, pipe}
 import akka.util.Timeout

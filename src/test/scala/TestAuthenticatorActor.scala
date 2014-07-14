@@ -1,5 +1,5 @@
 
-import io.floyd.actors.AuthenticatorActor
+import io.floyd.db.AuthenticatorActor
 
 import akka.testkit.TestActorRef
 import spray.routing.authentication.UserPass

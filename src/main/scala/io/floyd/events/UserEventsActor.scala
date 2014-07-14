@@ -1,6 +1,6 @@
 package io.floyd.events
 
-import io.floyd.actors.{DevicesActor, Device}
+import io.floyd.db.{DevicesActor, Device}
 
 import akka.actor.{Actor, ActorRef, Props, ActorLogging}
 import akka.util.Timeout

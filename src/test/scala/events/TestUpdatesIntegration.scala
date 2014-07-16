@@ -18,7 +18,7 @@ class TestUpdatesIntegration extends BaseUnitTestActor with UpdateHttpDataMatche
     listOfClients foreach {
       _.expectMsgPF() {
         case MessageChunk(data, extension) =>
-          jsonShouldBe(data, "multipleUpdate")
+          jsonShouldBe(data, Map("data" -> "multipleUpdate"))
       }
     }
   }

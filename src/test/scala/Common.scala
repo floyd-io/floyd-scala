@@ -39,16 +39,16 @@ trait CreateUser {
 
 
 trait UpdateHttpDataMatcher extends Matchers with TestKitBase {
-  def jsonShouldBe(httpData: HttpData, expected:String) = {
+  def jsonShouldBe(httpData: HttpData, expected:AnyRef) = {
     val jsonString = httpData.asString(HttpCharsets.`UTF-8`)
     val result = JSON.parseFull(jsonString)
     result match {
-      case Some(jsonObject) => jsonObject should be (Map("data"->expected))
+      case Some(jsonObject) => jsonObject should be (expected)
       case None => fail(s"failed parsing of JSON, expected ${expected}, actual JSON: $jsonString")
     }
   }
 
-  def expectMsgChunk(dataExpected: String) = {
+  def expectMsgChunk(dataExpected: AnyRef) = {
     expectMsgPF() {
       case MessageChunk(data, extension) =>
         jsonShouldBe(data, dataExpected)

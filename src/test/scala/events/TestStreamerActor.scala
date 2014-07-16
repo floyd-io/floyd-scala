@@ -1,3 +1,4 @@
+import io.floyd.db.Device
 import io.floyd.events.{StreamerActor, Update, StartStream}
 
 import akka.testkit.TestActorRef
@@ -14,13 +15,22 @@ class TestStreamerActor extends BaseUnitTestActor with UpdateHttpDataMatcher {
     expectMsg(SetRequestTimeout(10 minutes))
     expectMsgPF() {
       case ChunkedResponseStart(HttpResponse(_, httpEntity, _, _)) =>
-        jsonShouldBe(httpEntity.data, "start")
+        jsonShouldBe(httpEntity.data, Map("data" -> "start"))
     }
   }
 
   it should "send JSON updates to its client" in {
     val actorRef = TestActorRef(StreamerActor.props(self))
     actorRef ! Update(Map("data"->"test"))
-    expectMsgChunk("test")
+    expectMsgChunk(Map("data" -> "test"))
+  }
+
+  it should "send a list of devices as a JSON array" in {
+    val actorRef = TestActorRef(StreamerActor.props(self))
+    actorRef ! Update(List(Device("11","999","inserted by tests","smartBulb")))
+    expectMsgChunk(List(
+      Map("id"->"11", "serialNumber" -> "999",
+        "description" -> "inserted by tests", "typeOfDevice" -> "smartBulb"
+      )))
   }
 }

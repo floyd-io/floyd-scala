@@ -118,7 +118,8 @@ class FloydServiceActor extends HttpServiceActor with ActorLogging {
     (path("device" / "update") & post) {
       authDevice { device =>
         formFields('property,'value) { (property, value) =>
-          lookupBus.publish(MsgEnvelope("device=" + device, Update(property+"="+value)))
+          val propertyMap = Map("id"->device,property -> value)
+          lookupBus.publish(MsgEnvelope("device=" + device, Update(propertyMap)))
           complete("update sent")
         }
       }

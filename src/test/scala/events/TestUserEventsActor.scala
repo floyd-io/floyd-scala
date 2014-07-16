@@ -39,7 +39,7 @@ class TestUserEventsActor extends BaseUnitTestActor with UpdateHttpDataMatcher {
     userEventsActor ! UpdateForUser("user1@hotmail.com", Map("data" -> "update"))
     testprobe1.expectMsgPF() {
       case MessageChunk(data, extension) =>
-        jsonShouldBe(data, "update")
+        jsonShouldBe(data, Map("data" -> "update"))
     }
   }
 }

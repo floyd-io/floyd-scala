@@ -36,7 +36,7 @@ class TestUserEventsActor extends BaseUnitTestActor with UpdateHttpDataMatcher {
     val testprobe1 = TestProbe()
     userEventsActor ! StartStreamForUser("user1@hotmail.com", testprobe1.ref)
     testprobe1.receiveN(4)
-    userEventsActor ! UpdateForUser("user1@hotmail.com", "update")
+    userEventsActor ! UpdateForUser("user1@hotmail.com", Map("data" -> "update"))
     testprobe1.expectMsgPF() {
       case MessageChunk(data, extension) =>
         jsonShouldBe(data, "update")

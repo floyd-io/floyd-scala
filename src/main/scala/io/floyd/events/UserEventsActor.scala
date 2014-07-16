@@ -9,7 +9,7 @@ import akka.pattern.{ask, pipe}
 import scala.concurrent.duration._
 
 case class StartStreamForUser(user: String, client: ActorRef)
-case class UpdateForUser(user:String, data: String)
+case class UpdateForUser(user:String, data: AnyRef)
 
 class UserEventsActor extends Actor with ActorLogging with NamedStreamChilds {
 

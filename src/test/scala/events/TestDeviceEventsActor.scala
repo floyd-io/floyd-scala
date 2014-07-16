@@ -10,7 +10,7 @@ class TestDeviceEventsActor extends BaseUnitTestActor with UpdateHttpDataMatcher
     deviceEventsActor ! CreateStreamDevice("919", testActor)
     receiveN(2)
     val lookupBus = LookupBusImpl.instance
-    lookupBus.publish(MsgEnvelope("device=919", Update("updateDevice")))
+    lookupBus.publish(MsgEnvelope("device=919", Update(Map("data" -> "updateDevice"))))
     expectMsgChunk("updateDevice")
   }
 

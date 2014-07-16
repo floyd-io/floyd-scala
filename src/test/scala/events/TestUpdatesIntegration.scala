@@ -14,7 +14,7 @@ class TestUpdatesIntegration extends BaseUnitTestActor with UpdateHttpDataMatche
       testProbe.receiveN(2)
     }
 
-    allEventsActor ! Update("multipleUpdate")
+    allEventsActor ! Update(Map("data" -> "multipleUpdate"))
     listOfClients foreach {
       _.expectMsgPF() {
         case MessageChunk(data, extension) =>

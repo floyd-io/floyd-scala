@@ -12,12 +12,12 @@ class TestAuthenticatorActor extends BaseUnitTestActor with CreateUser {
     expectMsgClass(classOf[String])
   }
 
-  "Authenticator" should "invalidate inexistant user in DB with None" in withUser { (user, id) =>
+  it should "invalidate inexistant user in DB with None" in withUser { (user, id) =>
     authenticator ! UserPass("invalidEmail@yahoo.com", "password")
     expectMsg(None)
   }
 
-  "Authenticator" should "invalidate incorrect password user in DB with None" in withUser { (user, id) =>
+  it should "invalidate incorrect password user in DB with None" in withUser { (user, id) =>
     authenticator ! UserPass(user, "passwordIncorrect")
     expectMsg(None)
   }

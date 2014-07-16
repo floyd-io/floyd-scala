@@ -10,8 +10,6 @@ import java.util.UUID._
 
 class TestDevicesActor extends BaseUnitTestActor with CreateUser {
 
-  import concurrent.ExecutionContext.Implicits.global
-
   def withDevice(testcode: (String, String) => Any) = {
     withUser { (user, userId) =>
       val deviceId = randomUUID.toString
@@ -22,14 +20,6 @@ class TestDevicesActor extends BaseUnitTestActor with CreateUser {
         "type_of_device" -> "smartBulb",
         "user_id" -> userId
       )
-      try {
-        val result = ReactiveConnection.db("devices").insert(document)
-        Await.result(result, 5 seconds)
-        testcode(userId, deviceId)
-      } finally {
-        val result = ReactiveConnection.db("devices").remove(document)
-        Await.result(result, 5 seconds)
-      }
     }
   }
 

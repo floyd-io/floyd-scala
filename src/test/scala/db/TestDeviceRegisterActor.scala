@@ -13,7 +13,7 @@ import akka.testkit.TestProbe
 import scala.concurrent.ExecutionContext.Implicits.global
 import java.util.UUID.randomUUID
 
-class TestDeviceRegisterActor extends BaseUnitTestActor with ScalaFutures with CreateUser{
+class TestDeviceRegisterActor extends BaseUnitTestActor with ScalaFutures with CreateUser {
   val devices = ReactiveConnection.db("devices")
   val lookupbus = LookupBusImpl.instance
 

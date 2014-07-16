@@ -48,7 +48,7 @@ class TestDeviceRegisterActor extends BaseUnitTestActor with ScalaFutures with C
     }
   }
 
-  "DeviceRegisterActor" should
+  it should
     "give an error when a device is registered twice" in withUser { (user, userId) =>
 
     val deviceRegister =  TestActorRef[DeviceRegisterActor]

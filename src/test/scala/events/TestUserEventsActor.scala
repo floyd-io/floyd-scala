@@ -11,7 +11,7 @@ class TestUserEventsActor extends BaseUnitTestActor with UpdateHttpDataMatcher {
     testprobe1.receiveN(4)
   }
 
-  "UserEventsActor" should "create two actor streams for two streams message start" in {
+  it should "create two actor streams for two streams message start" in {
     val userEventsActor = TestActorRef[UserEventsActor]
     val testprobe1 = TestProbe()
     val testprobe2 = TestProbe()
@@ -21,7 +21,7 @@ class TestUserEventsActor extends BaseUnitTestActor with UpdateHttpDataMatcher {
     testprobe2.receiveN(4)
   }
 
-  "UserEventsActor" should "create two streams for different users" in {
+  it should "create two streams for different users" in {
     val userEventsActor = TestActorRef[UserEventsActor]
     val testprobe1 = TestProbe()
     val testprobe2 = TestProbe()
@@ -31,7 +31,7 @@ class TestUserEventsActor extends BaseUnitTestActor with UpdateHttpDataMatcher {
     testprobe2.receiveN(4)
   }
 
-  "UserEventsActor" should "send update to the correct user" in {
+  it should "send update to the correct user" in {
     val userEventsActor = TestActorRef[UserEventsActor]
     val testprobe1 = TestProbe()
     userEventsActor ! StartStreamForUser("user1@hotmail.com", testprobe1.ref)

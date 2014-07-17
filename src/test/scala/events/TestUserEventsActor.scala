@@ -8,7 +8,7 @@ class TestUserEventsActor extends BaseUnitTestActor with UpdateHttpDataMatcher {
     val userEventsActor = TestActorRef[UserEventsActor]
     val testprobe1 = TestProbe()
     userEventsActor ! StartStreamForUser("user1@hotmail.com", testprobe1.ref)
-    testprobe1.receiveN(4)
+    testprobe1.receiveN(3)
   }
 
   it should "create two actor streams for two streams message start" in {
@@ -17,8 +17,8 @@ class TestUserEventsActor extends BaseUnitTestActor with UpdateHttpDataMatcher {
     val testprobe2 = TestProbe()
     userEventsActor ! StartStreamForUser("user1@hotmail.com", testprobe1.ref)
     userEventsActor ! StartStreamForUser("user1@hotmail.com", testprobe2.ref)
-    testprobe1.receiveN(4)
-    testprobe2.receiveN(4)
+    testprobe1.receiveN(3)
+    testprobe2.receiveN(3)
   }
 
   it should "create two streams for different users" in {
@@ -27,15 +27,15 @@ class TestUserEventsActor extends BaseUnitTestActor with UpdateHttpDataMatcher {
     val testprobe2 = TestProbe()
     userEventsActor ! StartStreamForUser("user1@hotmail.com", testprobe1.ref)
     userEventsActor ! StartStreamForUser("user2@hotmail.com", testprobe2.ref)
-    testprobe1.receiveN(4)
-    testprobe2.receiveN(4)
+    testprobe1.receiveN(3)
+    testprobe2.receiveN(3)
   }
 
   it should "send update to the correct user" in {
     val userEventsActor = TestActorRef[UserEventsActor]
     val testprobe1 = TestProbe()
     userEventsActor ! StartStreamForUser("user1@hotmail.com", testprobe1.ref)
-    testprobe1.receiveN(4)
+    testprobe1.receiveN(3)
     userEventsActor ! UpdateForUser("user1@hotmail.com", Map("data" -> "update"))
     testprobe1.expectMsgPF() {
       case MessageChunk(data, extension) =>

@@ -26,7 +26,7 @@ class StreamerActor(client: ActorRef) extends Actor with ActorLogging {
     case StartStream() =>
       client ! SetRequestTimeout(10 minutes)
       client ! ChunkedResponseStart(
-        HttpResponse(entity = HttpEntity(`application/json`, updateData(Map("data"->"start"))))
+        HttpResponse(entity = HttpEntity(`application/json`, ""))
       )
 
     case x: Http.ConnectionClosed =>
@@ -37,7 +37,7 @@ class StreamerActor(client: ActorRef) extends Actor with ActorLogging {
       client ! MessageChunk(updateData(data))
 
     case RegisterListener(selector) =>
-      client ! MessageChunk(updateData("new listener on "+selector))
+      log.debug("new listener on "+selector)
       lookupBus.subscribe(self, selector)
   }
 

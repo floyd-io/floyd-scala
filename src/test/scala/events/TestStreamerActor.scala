@@ -4,6 +4,7 @@ import io.floyd.events.{StreamerActor, Update, StartStream}
 import akka.testkit.TestActorRef
 import spray.http.{SetRequestTimeout, ChunkedResponseStart,
   HttpResponse, MessageChunk}
+import spray.http.HttpData.Empty
   
 import scala.concurrent.duration._
 
@@ -15,7 +16,7 @@ class TestStreamerActor extends BaseUnitTestActor with UpdateHttpDataMatcher {
     expectMsg(SetRequestTimeout(10 minutes))
     expectMsgPF() {
       case ChunkedResponseStart(HttpResponse(_, httpEntity, _, _)) =>
-        jsonShouldBe(httpEntity.data, Map("data" -> "start"))
+        httpEntity.data should be (Empty)
     }
   }
 

@@ -25,10 +25,17 @@ class UserEventsActor extends Actor with ActorLogging with NamedStreamChilds {
       newStreamActor ! StartStream()
       newStreamActor ! RegisterListener("user="+user)
       implicit val timeout = Timeout(5 seconds)
-      val devices = (devicesActor ? user).mapTo[List[Device]]
-      devices map { devices =>
+      val devicesResponse = (devicesActor ? user).mapTo[List[Device]]
+
+      for {
+        devices <- devicesResponse
+        device <- devices
+      } newStreamActor ! RegisterListener("device=" + device.id)
+
+      devicesResponse map { devices =>
         Update(devices)
       } pipeTo newStreamActor
+      
     case UpdateForUser(user, data) =>
       lookupBus.publish(MsgEnvelope("user="+user, Update(data)))
   }

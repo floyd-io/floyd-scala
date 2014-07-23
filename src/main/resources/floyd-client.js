@@ -37,13 +37,16 @@ function messageSentTemplate(responseData) {
              + '</span>'
 }
 
-function connectionChanged(status) {
-    connected = status;
-    connectionStatus(status ? "Connected" : "Disconnected")
-    $("#btnConnect").text(status ? 'Disconnect' : 'Connect');
+function connectionChanged(isConnected) {
+    connected = isConnected;
+    connectionStatus(isConnected ? "Connected" : "Disconnected")
+    $("#btnConnect").text(isConnected ? 'Disconnect' : 'Connect');
     $("#btnConnect")
-        .removeClass('btn-' + (status ? 'success' : 'danger'))
-        .addClass('btn-' + (status ? 'danger' : 'success'));
+        .removeClass('btn-' + (isConnected ? 'success' : 'danger'))
+        .addClass('btn-' + (isConnected ? 'danger' : 'success'));
+
+    $("#textToPost").prop('disabled', !isConnected);
+    $("#btnPost").prop('disabled', !isConnected);
 }
 
 function reconnect() {
@@ -59,12 +62,14 @@ function reconnect() {
         //readyState: headers received 2, body received 3, done 4
         if (xhr.readyState != 2 && xhr.readyState != 3 && xhr.readyState != 4)
             return;
-        if (xhr.readyState == 3 && xhr.status != 200)
+        if (xhr.readyState == 3 && xhr.status != 200) {
+            connectionStatus("Error: " + xhr.status)
             return;
+        }
         if (xhr.status == 200) {
             if (xhr.readyState == 2) {
                 console.log("Connected...");
-                $('#status').text("Connected");
+                connectionStatus("Connected");
             }
             if (xhr.readyState == 3) {
                 pushMessageArrived(xhr.response.slice(nextLine))
@@ -75,7 +80,6 @@ function reconnect() {
 
     function pushMessageArrived(pushMessage) {
        $("#data").prepend(pushedMessageTemplate(pushMessage));
-       $("#data").addClass("play")
     }
 
     xhr.onload = function () {

@@ -1,110 +1,62 @@
 <html>
-    <input id="textToPost" type="text">
-    <input id="btnPost" type="submit" value="Post Message">
-    <div name="postStatus" id="postStatus"></div>
-    <br>
-    <br>
-	<input id = "btnConnect" type="submit" value="Connect!"/>
-	<div name="status" id="status">Disconnected</div>
-	<br>
-	<br>
-	<br>
-	<div>Received Pushes</div>
-	<div name="data" id="data" />
+<head>
+    <script src="//code.jquery.com/jquery-1.11.0.min.js"></script>
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css">
+    <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+    <script src="//ajax.microsoft.com/ajax/jquery.templates/beta1/jquery.tmpl.min.js"></script>
+    <style>
+        #status {
+        font-family: Consolas, Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace, serif;
+        padding: 5px;
+        background-color: #eee;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
 
-	<script src="//code.jquery.com/jquery-1.11.0.min.js"></script>
-	<script>
-		var connected = false;
-		var xhr;
+<div class="page-header">
+    <h1>FloydJS! <small>JS client for Floyd</small></h1>
+</div>
 
-		$("#btnPost").click(function() {
+<div class="row">
+    <div class="col-xs-2">
+        <span id="status">Disconnected</span>
+    </div>
+    <div class="col-xs-1">
+        <button id="btnConnect" type="button" class="btn btn-success">Connect</button>
+    </div>
+</div>
 
-            $.post( "update", $("#textToPost").val(), function(data) {
-                console.log("post sent");
-                $("#postStatus").text('posted: ' + $("#textToPost").val() + "  |  server says: " + data);
-                $("#textToPost").val("");
-            });
-		});
+<div class="row">
+    <div class="col-xs-6">
+        <h2><span class="glyphicon glyphicon-circle-arrow-up"></span>&nbsp;Upstream Messages</h2>
+        <form role="form">
+            <div class="row">
+               <div class="col-xs-8">
+                   <input id="textToPost" type="text" class="form-control" placeholder="aMessage">
+               </div>
+               <div class="col-xs-4">
+                <button id="btnPost" type="button" class="btn btn-default">Post Message</button>
+               </div>
 
-		$("#btnConnect").click(function(){
-		  
-			if (connected){
-				connected = false;
-				$("#btnConnect").prop('value', 'Connect');
-				xhr.abort();
-				console.log("Client Disconnected");
-			} 
-			else {		 
-				connected = true;
-				$("#btnConnect").prop('value', 'Disconnect');			
-				reconnect();
-			}
-		});
-				
-		function reconnect() {		  
-			console.log("Connecting to Server...");
-			$('#status').text("Connecting to Server...");
-		  
-			xhr = new XMLHttpRequest();
-			xhr.open('GET', 'part2.html', true);
+            </div>
+            <br/>
+            <div class="row">
+                <pre id="postStatus">&nbsp;</pre>
+            </div>
+        </form>
+    </div>
+    <div class="col-xs-6">
+        <h2><span class="glyphicon glyphicon-circle-arrow-down"></span>&nbsp;Received Pushes</h2>
 
-			var nextLine = 0;
-			console.log("opened");
+        <ul id="data" class="list-group"></ul>
+    </div>
+</div>
 
-			xhr.onreadystatechange = function () {
-			    console.log("onreadystatechange");
-				
-				//readyState: headers received 2, body received 3, done 4
-				if (xhr.readyState != 2 && xhr.readyState != 3 && xhr.readyState != 4)
-					return;
-				if (xhr.readyState == 3 && xhr.status != 200)
-					return;
-				if (xhr.readyState == 2 && xhr.status == 200)
-				{
-					console.log("Connected...");
-					$('#status').text("Connected. Listening...");
-				}
-				
-				$("#data").append("<div>"+xhr.response.slice(nextLine) +"</div>");  
-				
-				nextLine = xhr.response.length;
-			}
+ <script src="floyd-client.js"></script>
 
-			xhr.onload = function () {
-				//server completed the request.
-				
-				console.log("onload");
-				//reconnect();
-				
-				connected = false;
-				$("#btnConnect").prop('value', 'Connect');
-				console.log("Server disconnected");
-				$('#status').text("Disconnected");
-			}
-			
-			xhr.onerror = function () {
-				//console.log("reconnecting after error...");
-				//reconnect();
-				
-				//server closed. Handle reconnects...
-				console.log("Server disconnected in a graceless manner");
-				$('#status').text("Disconnected");				
-				connected = false;
-				$("#btnConnect").prop('value', 'Connect');				
-			}
-		  
-			xhr.onabort = function () {
-				//console.log("reconnecting after abort...");
-				//reconnect();
-				
-				//client aborted the operation.
-				console.log("aborted");
-				$('#status').text("Disconnected");
-			}
-
-            console.log("sending");
-			xhr.send();
-			console.log("sent");
-		};
-	</script>
+</div>
+</body>
 </html>

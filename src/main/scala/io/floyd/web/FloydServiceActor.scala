@@ -79,7 +79,7 @@ class FloydServiceActor extends HttpServiceActor with ActorLogging {
           }
         }
       } ~
-      path( "session") {
+      path("session") {
         formFields('user, 'pass).as(UserPass) { user =>
           val futureResult = (tokenAuthActor ? user).mapTo[Tuple2[String,String]]
           onComplete(futureResult) {
@@ -101,6 +101,9 @@ class FloydServiceActor extends HttpServiceActor with ActorLogging {
     } ~
     path("jsclient.html") {
       getFromResource("jsClient.html")
+    } ~
+    path("floyd-client.js") {
+       getFromResource("floyd-client.js")
     } ~
     path("device" / "register") {
       auth { userId =>

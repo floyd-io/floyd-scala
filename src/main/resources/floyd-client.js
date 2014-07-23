@@ -2,8 +2,7 @@ var connected = false;
 var xhr;
 
 $("#btnPost").click(function() {
-
-    $.post( "update", $("#textToPost").val(), function(data) {
+    $.post("update", $("#textToPost").val(), function(data) {
         console.log("post sent");
 
         $("#postStatus").html(messageSentTemplate(data))
@@ -12,15 +11,6 @@ $("#btnPost").click(function() {
             .focus()
     });
 });
-
-function messageSentTemplate(responseData) {
-    return '<span class="glyphicon glyphicon-circle-arrow-up">&nbsp;'
-             + $("#textToPost").val()
-             + '</span>&nbsp;&nbsp;'
-             + '<span class="glyphicon glyphicon-circle-arrow-down">&nbsp;'
-             + responseData
-             + '</span>'
-}
 
 $("#btnConnect").click(function(){
     if (connected) {
@@ -34,8 +24,22 @@ $("#btnConnect").click(function(){
     }
 });
 
+function connectionStatus(newStatus) {
+    $('#status').text(newStatus)
+}
+
+function messageSentTemplate(responseData) {
+    return '<span class="glyphicon glyphicon-circle-arrow-up">&nbsp;'
+             + $("#textToPost").val()
+             + '</span><br/><br/>'
+             + '<span class="glyphicon glyphicon-circle-arrow-down">&nbsp;'
+             + responseData
+             + '</span>'
+}
+
 function connectionChanged(status) {
     connected = status;
+    connectionStatus(status ? "Connected" : "Disconnected")
     $("#btnConnect").text(status ? 'Disconnect' : 'Connect');
     $("#btnConnect")
         .removeClass('btn-' + (status ? 'success' : 'danger'))
@@ -44,13 +48,10 @@ function connectionChanged(status) {
 
 function reconnect() {
     console.log("Connecting to Server...");
-    $('#status').text("Connecting...");
+    connectionStatus("Connecting...")
 
     xhr = new XMLHttpRequest();
-    xhr.open('GET', 'part2.html', true);
-
     var nextLine = 0;
-    console.log("opened");
 
     xhr.onreadystatechange = function () {
         console.log("onreadystatechange");
@@ -66,17 +67,16 @@ function reconnect() {
                 $('#status').text("Connected");
             }
             if (xhr.readyState == 3) {
-                $("#data").prepend(pushedMessageTemplate(xhr.response.slice(nextLine)));
+                pushMessageArrived(xhr.response.slice(nextLine))
                 nextLine = xhr.response.length;
             }
         }
     }
 
-    function pushedMessageTemplate(message) {
-        return '<li class="list-group-item"><b>' + currentTimeStamp() + '</b><pre>' + message + '</pre></li>'
+    function pushMessageArrived(pushMessage) {
+       $("#data").prepend(pushedMessageTemplate(pushMessage));
+       $("#data").addClass("play")
     }
-
-    function currentTimeStamp() { return new Date()t.toLocaleTimeString() }
 
     xhr.onload = function () {
         // server completed the request.
@@ -84,9 +84,7 @@ function reconnect() {
         //reconnect();
 
         connectionChanged(false)
-
         console.log("Server disconnected");
-        $('#status').text("Disconnected");
     }
 
     xhr.onerror = function () {
@@ -95,9 +93,7 @@ function reconnect() {
 
         //server closed. Handle reconnects...
         console.log("Server disconnected in a graceless manner");
-        $('#status').text("Disconnected");
-        connected = false;
-        $("#btnConnect").prop('value', 'Connect');
+        connectionChanged(false)
     }
 
     xhr.onabort = function () {
@@ -106,10 +102,21 @@ function reconnect() {
 
         //client aborted the operation.
         console.log("aborted");
-        $('#status').text("Disconnected");
+        connectionStatus("Disconnected");
     }
+
+    xhr.open('GET', 'part2.html', true);
+    console.log("opened");
 
     console.log("sending");
     xhr.send();
     console.log("sent");
 };
+
+function pushedMessageTemplate(message) {
+   return '<li class="list-group-item li-animated"><b>' + currentTimeStamp() + '</b><pre>' + message + '</pre></li>';
+}
+
+function currentTimeStamp() {
+    return new Date().toLocaleTimeString();
+}

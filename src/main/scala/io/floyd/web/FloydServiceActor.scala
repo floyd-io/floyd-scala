@@ -62,7 +62,7 @@ class FloydServiceActor extends HttpServiceActor with ActorLogging {
         "PONG"
       }
     } ~
-    (path("update") & post){
+    (path("update") & post) {
       entity(as[String]) { data =>
         allEventsActor ! Update(data)
         complete { "sent update to all-events-actor\n" }
@@ -104,6 +104,9 @@ class FloydServiceActor extends HttpServiceActor with ActorLogging {
     } ~
     path("floyd-client.js") {
        getFromResource("floyd-client.js")
+    } ~
+    path("floyd.css") {
+       getFromResource("floyd.css")
     } ~
     path("device" / "register") {
       auth { userId =>

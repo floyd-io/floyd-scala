@@ -56,25 +56,36 @@ function reconnect() {
     xhr = new XMLHttpRequest();
     var nextLine = 0;
 
+    console.log("opening...");
+    xhr.open('GET', 'part2.html', true);
+    console.log("opened");
+
+    console.log("sending...");
+    xhr.send();
+    console.log("sent");
+
     xhr.onreadystatechange = function () {
-        console.log("onreadystatechange");
+        console.log("onreadystatechange(" + this.readyState + ")");
 
         //readyState: headers received 2, body received 3, done 4
-        if (xhr.readyState != 2 && xhr.readyState != 3 && xhr.readyState != 4)
+        if (this.readyState != 2 && this.readyState != 3 && this.readyState != 4)
             return;
-        if (xhr.readyState == 3 && xhr.status != 200) {
-            connectionStatus("Error: " + xhr.status)
+        if (this.readyState == 3 && this.status != 200) {
+            connectionStatus("Error: " + this.status)
             return;
         }
-        if (xhr.status == 200) {
-            if (xhr.readyState == 2) {
+        if (this.status == 200) {
+            if (this.readyState == 2) {
                 console.log("Connected...");
                 connectionStatus("Connected");
             }
-            if (xhr.readyState == 3) {
-                pushMessageArrived(xhr.response.slice(nextLine))
-                nextLine = xhr.response.length;
+            if (this.readyState == 3) {
+                pushMessageArrived(this.response.slice(nextLine))
+                nextLine = this.response.length;
             }
+        }
+        else {
+            connectionStatus("Error: " + this.status)
         }
     }
 
@@ -108,13 +119,6 @@ function reconnect() {
         console.log("aborted");
         connectionStatus("Disconnected");
     }
-
-    xhr.open('GET', 'part2.html', true);
-    console.log("opened");
-
-    console.log("sending");
-    xhr.send();
-    console.log("sent");
 };
 
 function pushedMessageTemplate(message) {

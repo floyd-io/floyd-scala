@@ -4,7 +4,7 @@ import io.floyd.actors._
 import io.floyd.events._
 import io.floyd.db._
 
-import spray.http.StatusCodes.{Forbidden, Conflict}
+import spray.http.StatusCodes.{Forbidden, Conflict, MethodNotAllowed}
 import spray.http._
 import spray.routing._
 import spray.http.MediaTypes._
@@ -29,6 +29,7 @@ class FloydServiceActor extends HttpServiceActor with ActorLogging {
   val deviceRegisterActor = context.actorOf(Props[DeviceRegisterActor], "device-register-actor")
   val deviceAuthActor = context.actorOf(Props[DeviceAuthActor], "device-auth-actor")
   val deviceEventsActor = context.actorOf(Props[DeviceEventsActor], "devices-events-actor")
+  val userRegisterActor = context.actorOf(Props[UserRegisterActor], "user-register-actor")
 
   val lookupBus = LookupBusImpl.instance
   implicit val timeout = Timeout(5 seconds)
@@ -88,6 +89,17 @@ class FloydServiceActor extends HttpServiceActor with ActorLogging {
               complete(compact(render(map)))
             case Failure(ex) => complete(Forbidden, s"Invalid User")
           }
+        }
+      } ~
+      post {
+        formFields('user, 'pass).as(UserPass) { user =>
+          onComplete(userRegisterActor ? user){
+            case Success(x) =>
+              complete { "user registrated\n" }
+            case Failure(ex) =>
+              complete(MethodNotAllowed, ex.getLocalizedMessage())
+          }
+
         }
       }
     } ~
